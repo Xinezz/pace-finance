@@ -1,0 +1,275 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------ */
+/* Design tokens. Light is the default; dark is a deliberate re-selection, not an inversion. */
+/* ------------------------------------------------------------------ */
+:root {
+  color-scheme: light;
+  --c-bg: #f8f6f0; /* warm ivory */
+  --c-surface: #fdfcf9;
+  --c-surface2: #f2efe7;
+  --c-line: #e4ded3;
+  --c-line2: #d8d0c4; /* warm taupe */
+  --c-ink: #34483b; /* deep forest */
+  --c-text: #343832; /* charcoal */
+  --c-muted: #666b61;
+
+  --c-sage: #a8b5a0;
+  --c-sage-deep: #556f5d;
+  --c-sage-soft: #e6ebe0;
+  --c-blue: #b8c9d6;
+  --c-blue-deep: #44667e;
+  --c-blue-soft: #e4ecf2;
+  --c-peach: #e8b9a5;
+  --c-peach-deep: #9c4f34;
+  --c-peach-soft: #f8e6dd;
+  --c-butter: #e8ddaa;
+  --c-butter-deep: #6f5f14;
+  --c-butter-soft: #f6f1d9;
+
+  --c-primary: #34483b;
+  --c-on-primary: #f8f6f0;
+  --c-overlay: rgb(36 48 40 / 0.42);
+  --shadow-card: 0 1px 2px rgb(52 72 59 / 0.04), 0 6px 20px -8px rgb(52 72 59 / 0.1);
+  --shadow-pop: 0 2px 6px rgb(52 72 59 / 0.08), 0 18px 40px -12px rgb(52 72 59 / 0.22);
+}
+
+:root.dark {
+  color-scheme: dark;
+  --c-bg: #151a16;
+  --c-surface: #1d241f;
+  --c-surface2: #252e27;
+  --c-line: #2f3932;
+  --c-line2: #3d493f;
+  --c-ink: #e9eee0;
+  --c-text: #d8ddd0;
+  --c-muted: #9ba596;
+
+  --c-sage: #a8b5a0;
+  --c-sage-deep: #b9c9b0;
+  --c-sage-soft: #2a362d;
+  --c-blue: #8fa9bb;
+  --c-blue-deep: #a9c3d4;
+  --c-blue-soft: #25313a;
+  --c-peach: #d9987f;
+  --c-peach-deep: #efb9a2;
+  --c-peach-soft: #3b2c26;
+  --c-butter: #cdbf7e;
+  --c-butter-deep: #e8dd9f;
+  --c-butter-soft: #38341f;
+
+  --c-primary: #a8b5a0;
+  --c-on-primary: #14201a;
+  --c-overlay: rgb(5 9 6 / 0.62);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 20px -8px rgb(0 0 0 / 0.5);
+  --shadow-pop: 0 2px 6px rgb(0 0 0 / 0.4), 0 18px 40px -12px rgb(0 0 0 / 0.65);
+}
+
+@theme inline {
+  --color-bg: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-surface2: var(--c-surface2);
+  --color-line: var(--c-line);
+  --color-line2: var(--c-line2);
+  --color-ink: var(--c-ink);
+  --color-body: var(--c-text);
+  --color-muted: var(--c-muted);
+  --color-sage: var(--c-sage);
+  --color-sage-deep: var(--c-sage-deep);
+  --color-sage-soft: var(--c-sage-soft);
+  --color-blue: var(--c-blue);
+  --color-blue-deep: var(--c-blue-deep);
+  --color-blue-soft: var(--c-blue-soft);
+  --color-peach: var(--c-peach);
+  --color-peach-deep: var(--c-peach-deep);
+  --color-peach-soft: var(--c-peach-soft);
+  --color-butter: var(--c-butter);
+  --color-butter-deep: var(--c-butter-deep);
+  --color-butter-soft: var(--c-butter-soft);
+  --color-primary: var(--c-primary);
+  --color-on-primary: var(--c-on-primary);
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Fraunces Variable', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+
+  --shadow-card: var(--shadow-card);
+  --shadow-pop: var(--shadow-pop);
+}
+
+/* ------------------------------------------------------------------ */
+
+html {
+  background: var(--c-bg);
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100dvh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, .font-serif {
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
+  color: var(--c-ink);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--c-sage) 45%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-sage-deep);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+button, [role='button'], a, select, summary {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Stat values scale with their card so long amounts never clip */
+.stat-card { container-type: inline-size; }
+.stat-value { font-size: clamp(1.2rem, 10.5cqw, 1.8rem); }
+.stat-value-hero { font-size: clamp(1.5rem, 12cqw, 2.6rem); }
+
+/* gentle scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-line2) transparent;
+}
+
+/* ------------------------------------------------------------------ */
+/* Motion                                                              */
+/* ------------------------------------------------------------------ */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes grow-x {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+@keyframes confetti-fall {
+  0% { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(var(--dx, 0), 105vh, 0) rotate(var(--rot, 540deg)); opacity: 0.9; }
+}
+@keyframes soft-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-sage) 50%, transparent); }
+  50% { box-shadow: 0 0 0 8px transparent; }
+}
+
+.page-enter { animation: fade-up 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.stagger > * { animation: fade-up 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.stagger > *:nth-child(2) { animation-delay: 0.04s; }
+.stagger > *:nth-child(3) { animation-delay: 0.08s; }
+.stagger > *:nth-child(4) { animation-delay: 0.12s; }
+.stagger > *:nth-child(5) { animation-delay: 0.16s; }
+.stagger > *:nth-child(6) { animation-delay: 0.2s; }
+.bar-grow { transform-origin: left center; animation: grow-x 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--c-surface2) 25%, var(--c-line) 37%, var(--c-surface2) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.6s ease infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Dialogs (native <dialog>: focus trap, Esc and inert background for free) */
+/* ------------------------------------------------------------------ */
+dialog.pace-dialog {
+  border: 1px solid var(--c-line);
+  background: var(--c-surface);
+  color: var(--c-text);
+  border-radius: 1.5rem;
+  padding: 0;
+  box-shadow: var(--shadow-pop);
+  width: min(100% - 2rem, var(--dialog-w, 34rem));
+  max-height: min(100dvh - 2rem, 52rem);
+  margin: auto;
+  overflow: hidden;
+}
+dialog.pace-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  animation: pop-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+dialog.pace-dialog::backdrop {
+  background: var(--c-overlay);
+  backdrop-filter: blur(3px);
+  animation: fade-in 0.2s ease both;
+}
+@media (max-width: 640px) {
+  dialog.pace-dialog {
+    width: 100%;
+    max-width: 100%;
+    margin: auto 0 0 0;
+    border-radius: 1.5rem 1.5rem 0 0;
+    max-height: 92dvh;
+  }
+  dialog.pace-dialog[open] {
+    animation: sheet-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+}
+
+/* Charts: keep Recharts focus outlines subtle */
+.recharts-wrapper:focus, .recharts-surface:focus { outline: none; }
+.recharts-text { font-family: var(--font-sans); }
+
+/* Inputs: avoid iOS zoom, keep number inputs tidy */
+input, select, textarea { font-size: 16px; }
+@media (min-width: 640px) {
+  input, select, textarea { font-size: 14px; }
+}
+input[type='number']::-webkit-inner-spin-button { display: none; }
+
+/* ------------------------------------------------------------------ */
+/* Print: the Reports page doubles as a printable summary              */
+/* ------------------------------------------------------------------ */
+@page { margin: 14mm; }
+
+@media print {
+  html, body { background: #fff !important; color: #000 !important; }
+  .no-print { display: none !important; }
+  .print-full { margin: 0 !important; padding: 0 !important; max-width: none !important; }
+  .print-card { box-shadow: none !important; border: 1px solid #ccc !important; break-inside: avoid; }
+}
