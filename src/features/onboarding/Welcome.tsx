@@ -1,6 +1,7 @@
 import { LockKeyhole, PiggyBank, Tags } from 'lucide-react';
 import { createDemoData } from '../../domain/demo';
 import { useStore } from '../../state/store';
+import { AccountStrip } from '../../components/account/AccountStrip';
 import { Logo } from '../../components/layout/nav';
 import { Button } from '../../components/ui/Button';
 
@@ -22,6 +23,7 @@ export function Welcome() {
         <div className="absolute bottom-10 right-10 h-40 w-40 rounded-full bg-butter/40 blur-2xl" />
       </div>
 
+      <AccountStrip />
       <main className="stagger mx-auto flex w-full max-w-xl flex-col items-center text-center">
         <div className="mb-6 flex items-center gap-3">
           <Logo size={44} />

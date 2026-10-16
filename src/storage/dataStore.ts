@@ -10,7 +10,19 @@
 import { SCHEMA_VERSION, type AppData } from '../domain/types';
 import { sanitizeAppData } from './sanitize';
 
-export type StoreKind = 'indexeddb' | 'localstorage' | 'memory';
+export type StoreKind = 'indexeddb' | 'localstorage' | 'memory' | 'cloud';
+
+/**
+ * Thrown by a cloud store when the saved copy changed somewhere else (another device or tab)
+ * since this one last loaded it. The app asks the user which version to keep; it never
+ * overwrites silently.
+ */
+export class ConflictError extends Error {
+  constructor(public readonly remoteVersion: number) {
+    super('This account was changed somewhere else.');
+    this.name = 'ConflictError';
+  }
+}
 
 export interface DataStore {
   readonly kind: StoreKind;
@@ -19,6 +31,8 @@ export interface DataStore {
   /** `prev` is what was last persisted, so implementations can write only the difference. */
   save(next: AppData, prev: AppData | null): Promise<void>;
   clear(): Promise<void>;
+  /** Cloud stores only: after a ConflictError, let the next save replace the newer remote copy. */
+  acceptRemote?(remoteVersion: number): void;
 }
 
 /* ------------------------------------------------------------------ */

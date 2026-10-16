@@ -1,5 +1,9 @@
-import { Database, Download, FileUp, HardDrive, Pencil, Plus, RotateCcw, ShieldCheck, Sparkles, Trash2, Upload, X } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Database, Download, FileUp, HardDrive, LogOut, Pencil, Plus, RotateCcw, ShieldCheck, Sparkles, Trash2, Upload, UserRound, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useAuth } from '../../auth/AuthProvider';
+import { PasswordInput, StrengthMeter } from '../../auth/PasswordFields';
+import { checkPassword } from '../../auth/validate';
+import { createBestStore } from '../../storage/dataStore';
 import { CategoryEditorModal } from '../../components/category/CategoryEditor';
 import { CategoryChip, CategoryIcon } from '../../components/category/CategoryChip';
 import { ImportWizard } from '../../components/import/ImportWizard';
@@ -27,6 +31,148 @@ function Section({ id, title, subtitle, icon, children, action }: { id: string; 
       <CardHeader id={`${id}-title`} title={title} subtitle={subtitle} icon={icon} action={action} />
       {children}
     </Card>
+  );
+}
+
+/* ---------------- account ---------------- */
+
+function AccountSection() {
+  const auth = useAuth();
+  const { toast, confirm } = useFeedback();
+  const [pw, setPw] = useState('');
+  const [pw2, setPw2] = useState('');
+  const [pwError, setPwError] = useState<string | null>(null);
+  const [pwBusy, setPwBusy] = useState(false);
+  const [deleteText, setDeleteText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [hasLocal, setHasLocal] = useState(false);
+
+  // Is there data on this device from before signing in? (It is never touched automatically.)
+  useEffect(() => {
+    if (auth.status !== 'signed-in') return;
+    let alive = true;
+    createBestStore()
+      .then(({ store }) => store.load())
+      .then((copy) => alive && setHasLocal(!!copy && copy.meta.mode !== 'new'))
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [auth.status]);
+
+  if (auth.status === 'unconfigured') {
+    return (
+      <Section id="account" title="Account" subtitle="Sign-in isn’t set up on this site" icon={<UserRound size={17} />}>
+        <p className="text-sm leading-relaxed text-muted">
+          Pace is running on this device only: your data stays in this browser and nobody else can reach it. To add accounts and sync across devices, connect a Supabase project (see <code className="rounded bg-surface2 px-1.5 py-0.5 text-ink">supabase/SETUP.md</code>).
+        </p>
+      </Section>
+    );
+  }
+
+  if (auth.status === 'guest') {
+    return (
+      <Section id="account" title="Account" subtitle="You’re using Pace without an account" icon={<UserRound size={17} />}>
+        <p className="mb-4 text-sm leading-relaxed text-muted">Your data stays only in this browser. Create an account to keep it safe in the cloud and use Pace on any device.</p>
+        <Button variant="primary" onClick={auth.leaveGuestMode}>Sign in or create an account</Button>
+      </Section>
+    );
+  }
+
+  if (auth.status !== 'signed-in' || !auth.user) return null;
+  const email = auth.user.email;
+
+  const changePassword = async (e: FormEvent) => {
+    e.preventDefault();
+    const check = checkPassword(pw, email);
+    if (!check.ok) return setPwError(check.issues[0]);
+    if (pw !== pw2) return setPwError('The two passwords don’t match.');
+    setPwError(null);
+    setPwBusy(true);
+    const res = await auth.updatePassword(pw);
+    setPwBusy(false);
+    if (!res.ok) return setPwError(res.error ?? 'We couldn’t change the password.');
+    setPw('');
+    setPw2('');
+    toast('Password changed.');
+  };
+
+  const eraseLocal = async () => {
+    const ok = await confirm({
+      title: 'Erase the copy on this device?',
+      tone: 'danger',
+      confirmLabel: 'Erase from this device',
+      message: 'This removes the data that was stored in this browser from before you signed in. Your account’s data in the cloud isn’t affected.',
+    });
+    if (!ok) return;
+    const { store } = await createBestStore();
+    await store.clear();
+    setHasLocal(false);
+    toast('Erased from this device.');
+  };
+
+  const deleteAccount = async () => {
+    const ok = await confirm({
+      title: 'Delete your account?',
+      tone: 'danger',
+      confirmLabel: 'Delete everything',
+      message: (
+        <>
+          <p>This permanently deletes your login and <strong>all of your data</strong> in the cloud: transactions, goals, budgets, everything. It can’t be undone.</p>
+          <p className="mt-2 text-muted">Download a backup first if you might want it later.</p>
+        </>
+      ),
+    });
+    if (!ok) return;
+    setDeleting(true);
+    const res = await auth.deleteAccount();
+    setDeleting(false);
+    if (!res.ok) toast(res.error ?? 'We couldn’t delete the account.', { kind: 'error' });
+  };
+
+  return (
+    <Section id="account" title="Account" subtitle="Signed in. Your data is saved to your account and synced across your devices." icon={<UserRound size={17} />} action={<Button size="sm" icon={<LogOut size={14} />} onClick={() => void auth.signOut()}>Sign out</Button>}>
+      <div className="flex flex-col gap-6">
+        <p className="text-sm text-muted">
+          Signed in as <strong className="text-ink">{email}</strong>
+        </p>
+
+        <form onSubmit={changePassword} noValidate className="grid gap-4 sm:max-w-md">
+          <p className="font-medium text-ink">Change password</p>
+          <Field label="New password" required error={pwError}>
+            <PasswordInput value={pw} onChange={setPw} autoComplete="new-password" />
+          </Field>
+          <StrengthMeter password={pw} email={email} />
+          <Field label="Confirm new password" required>
+            <PasswordInput value={pw2} onChange={setPw2} autoComplete="new-password" />
+          </Field>
+          <div>
+            <Button type="submit" variant="primary" loading={pwBusy} disabled={!pw}>Change password</Button>
+          </div>
+        </form>
+
+        {hasLocal && (
+          <div className="rounded-2xl bg-surface2 p-4">
+            <p className="font-medium text-ink">Data on this device</p>
+            <p className="mt-1 text-sm text-muted">This browser still holds data from before you signed in. If it’s a shared computer, you may want to erase it.</p>
+            <Button className="mt-3" onClick={eraseLocal}>Erase the copy on this device</Button>
+          </div>
+        )}
+
+        <div className="rounded-2xl border border-peach/50 bg-peach-soft/50 p-4">
+          <p className="font-medium text-peach-deep">Delete account</p>
+          <p className="mt-1 text-sm text-body">Permanently deletes your login and everything saved in your account.</p>
+          <div className="mt-3 flex flex-wrap items-end gap-3">
+            <Field label={`Type ${email} to confirm`} required className="min-w-64 flex-1">
+              <TextInput value={deleteText} onChange={(e) => setDeleteText(e.target.value)} autoComplete="off" spellCheck={false} />
+            </Field>
+            <Button variant="danger" icon={<Trash2 size={15} />} loading={deleting} disabled={deleteText.trim().toLowerCase() !== email.toLowerCase()} onClick={deleteAccount}>
+              Delete my account
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Section>
   );
 }
 
@@ -69,7 +215,7 @@ function AccountsSection() {
   };
 
   return (
-    <Section id="accounts" title="Accounts" subtitle="Balance = opening balance + every transaction you record" icon={<HardDrive size={17} />} action={<Button size="sm" icon={<Plus size={14} />} onClick={() => begin()}>Add account</Button>}>
+    <Section id="accounts" title="Bank accounts" subtitle="Balance = opening balance + every transaction you record" icon={<HardDrive size={17} />} action={<Button size="sm" icon={<Plus size={14} />} onClick={() => begin()}>Add account</Button>}>
       <ul className="divide-y divide-line">
         {data.accounts.map((a) => (
           <li key={a.id} className="py-3">
@@ -324,7 +470,7 @@ function DataSection() {
       title: 'Start with a clean account?',
       tone: 'danger',
       confirmLabel: 'Erase and start clean',
-      message: <><p>This permanently deletes <strong>everything</strong> in Pace on this device: transactions, goals, budgets, categories and settings.</p><p className="mt-2 text-muted">Download a backup first if there’s any chance you’ll want it back.</p></>,
+      message: <><p>This permanently deletes <strong>everything</strong> in Pace {storeKind === 'cloud' ? 'in your account, on all of your devices' : 'on this device'}: transactions, goals, budgets, categories and settings.</p><p className="mt-2 text-muted">Download a backup first if there’s any chance you’ll want it back.</p></>,
     });
     if (!ok) return;
     dispatch({ type: 'startFresh' });
@@ -341,7 +487,7 @@ function DataSection() {
   };
 
   return (
-    <Section id="data" title="Your data" subtitle="Stored only in this browser. Back it up whenever you like." icon={<Database size={17} />}>
+    <Section id="data" title="Your data" subtitle={storeKind === 'cloud' ? 'Saved to your account. Back it up whenever you like.' : 'Stored only in this browser. Back it up whenever you like.'} icon={<Database size={17} />}>
       <div className="flex flex-col gap-6">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-2xl border border-line p-4">
@@ -379,7 +525,7 @@ function DataSection() {
           </div>
         </div>
 
-        <p className="flex items-center gap-2 text-xs text-muted"><HardDrive size={14} /> Saved in this browser using {storeKind === 'indexeddb' ? 'IndexedDB' : storeKind === 'localstorage' ? 'localStorage' : 'temporary memory (not persistent!)'}. Clearing site data for this page will erase it, so keep a backup.</p>
+        <p className="flex items-center gap-2 text-xs text-muted"><HardDrive size={14} /> {storeKind === 'cloud' ? 'Saved to your account in the cloud and synced across your devices. A backup file is still a good idea.' : <>Saved in this browser using {storeKind === 'indexeddb' ? 'IndexedDB' : storeKind === 'localstorage' ? 'localStorage' : 'temporary memory (not persistent!)'}. Clearing site data for this page will erase it, so keep a backup.</>}</p>
       </div>
 
       {importing && <ImportWizard onClose={() => setImporting(false)} />}
@@ -446,10 +592,15 @@ function PreferencesSection() {
 }
 
 function AboutSection() {
+  const { status } = useAuth();
   return (
     <Section id="about" title="About Pace" subtitle="Local-first by design">
       <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted">
-        <li>Everything is stored in this browser on this device. There are no accounts, servers, trackers or bank connections.</li>
+        <li>
+          {status === 'signed-in'
+            ? 'Your data is saved to your private account in the cloud, protected so only you can read it. There are no trackers and no bank connections.'
+            : 'Everything is stored in this browser on this device. There are no servers, trackers or bank connections.'}
+        </li>
         <li>Money is stored as whole minor units (cents), so totals never pick up rounding errors.</li>
         <li>Keyboard: press <kbd className="rounded bg-surface2 px-1.5 text-ink">N</kbd> anywhere to add a transaction. In the categorize flow use <kbd className="rounded bg-surface2 px-1.5 text-ink">1</kbd>–<kbd className="rounded bg-surface2 px-1.5 text-ink">9</kbd> to pick and <kbd className="rounded bg-surface2 px-1.5 text-ink">S</kbd> to skip.</li>
         <li>Use one browser tab at a time. Two tabs editing at once can overwrite each other.</li>
@@ -465,7 +616,7 @@ export function SettingsPage() {
     if (section) window.setTimeout(() => document.getElementById(section)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
   }, [section]);
 
-  const links = [['preferences', 'Preferences'], ['accounts', 'Accounts'], ['categories', 'Categories'], ['rules', 'Remembered'], ['quick', 'Quick actions'], ['data', 'Your data'], ['about', 'About']];
+  const links = [['preferences', 'Preferences'], ['account', 'Account'], ['accounts', 'Bank accounts'], ['categories', 'Categories'], ['rules', 'Remembered'], ['quick', 'Quick actions'], ['data', 'Your data'], ['about', 'About']];
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Settings" subtitle="Preferences, categories, accounts and your data." />
@@ -475,6 +626,7 @@ export function SettingsPage() {
         ))}
       </nav>
       <PreferencesSection />
+      <AccountSection />
       <AccountsSection />
       <CategoriesSection />
       <RulesSection />
