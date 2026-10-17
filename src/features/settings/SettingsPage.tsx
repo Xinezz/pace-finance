@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } 
 import { useAuth } from '../../auth/AuthProvider';
 import { PasswordInput, StrengthMeter } from '../../auth/PasswordFields';
 import { checkPassword } from '../../auth/validate';
+import { cloudConfigProblem } from '../../cloud';
 import { createBestStore } from '../../storage/dataStore';
 import { CategoryEditorModal } from '../../components/category/CategoryEditor';
 import { CategoryChip, CategoryIcon } from '../../components/category/CategoryChip';
@@ -61,8 +62,14 @@ function AccountSection() {
   }, [auth.status]);
 
   if (auth.status === 'unconfigured') {
+    const problem = cloudConfigProblem();
     return (
       <Section id="account" title="Account" subtitle="Sign-in isn’t set up on this site" icon={<UserRound size={17} />}>
+        {problem && (
+          <p role="alert" className="mb-3 rounded-xl border border-peach/60 bg-peach-soft px-3 py-2.5 text-sm font-medium text-peach-deep">
+            Accounts are switched off because of a setup problem: {problem}
+          </p>
+        )}
         <p className="text-sm leading-relaxed text-muted">
           Pace is running on this device only: your data stays in this browser and nobody else can reach it. To add accounts and sync across devices, connect a Supabase project (see <code className="rounded bg-surface2 px-1.5 py-0.5 text-ink">supabase/SETUP.md</code>).
         </p>
