@@ -85,7 +85,7 @@ function GoalCard({ goal, onEdit, onContribute }: { goal: Goal; onEdit: () => vo
         <div className="mt-5 flex flex-wrap gap-2">
           <Button size="sm" variant="primary" icon={<Plus size={14} />} onClick={() => onContribute('add')}>Add money</Button>
           <Button size="sm" icon={<MinusIcon size={14} />} onClick={() => onContribute('withdraw')} disabled={p.saved <= 0}>Take out</Button>
-          <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-sage-deep hover:underline">
+          <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="tap ml-auto inline-flex items-center gap-1 text-xs font-medium text-sage-deep hover:underline">
             History ({history.length}) <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
           </button>
         </div>
@@ -157,7 +157,7 @@ export function SavingsPage() {
         }
       />
 
-      <section aria-label="Savings figures" className="grid gap-3 md:grid-cols-3">
+      <section aria-label="Savings figures" className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <Card className="!p-5">
           <div className="flex items-center gap-2 text-[13px] font-medium text-muted"><Wallet size={15} /> Left after income & expenses <InfoTip text={`Income minus expenses for ${formatMonthLabel(month)}. It's what's left over for the month — not necessarily moved into a savings account yet.`} /></div>
           <p className={`mt-2 font-serif text-3xl tabular-nums ${ov.netCashFlow < 0 ? 'text-peach-deep' : 'text-ink'}`}>{fmt(ov.netCashFlow, { signed: ov.netCashFlow < 0 })}</p>
@@ -218,7 +218,7 @@ export function SavingsPage() {
         {data.goals.length === 0 ? (
           <Card><EmptyState icon={<PiggyBank size={26} />} title="What are you saving for?" action={<Button variant="primary" icon={<Plus size={16} />} onClick={() => setGoalModal('new')}>Create your first goal</Button>}>An emergency fund, a holiday, a new laptop. A goal turns “save more” into something you can see growing.</EmptyState></Card>
         ) : (
-          <div className="stagger grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="stagger grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {sortedGoals.map((g) => (
               <GoalCard key={g.id} goal={g} onEdit={() => setGoalModal(g)} onContribute={(mode) => setContrib({ goal: g, mode })} />
             ))}

@@ -246,7 +246,7 @@ export function TransactionModal({ state, onClose }: Props) {
           />
         </Field>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Amount" required error={errors.amount}>
             <MoneyInput value={amount} onChange={setAmount} currency={currency} />
           </Field>
@@ -258,7 +258,7 @@ export function TransactionModal({ state, onClose }: Props) {
         {isTransfer ? (
           <div className="flex flex-col gap-4 rounded-2xl border border-butter/60 bg-butter-soft/60 p-4">
             <p className="text-[13px] leading-relaxed text-butter-deep">This moves money between your own accounts. It changes balances, but it isn’t counted as income or spending.</p>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="From" required>
                 <Select value={accountId} onChange={(e) => setAccountId(e.target.value)}>
                   {data.accounts.map((a) => (
@@ -309,7 +309,7 @@ export function TransactionModal({ state, onClose }: Props) {
           </>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {!isTransfer && (
             <Field label="Payment method">
               <Select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
@@ -346,22 +346,23 @@ export function TransactionModal({ state, onClose }: Props) {
           </label>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4">
-          <div>
+        {/* On phones: full-width buttons, the main one on top and Delete at the very bottom. */}
+        <div className="flex flex-col-reverse gap-3 border-t border-line pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2">
+          <div className={existing ? '' : 'hidden sm:block'}>
             {existing && (
-              <Button variant="danger" onClick={remove} icon={<Trash2 size={15} />}>
+              <Button variant="danger" onClick={remove} icon={<Trash2 size={15} />} className="w-full sm:w-auto">
                 Delete
               </Button>
             )}
           </div>
-          <div className="flex flex-wrap justify-end gap-2">
-            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+            <Button variant="ghost" onClick={onClose} className="w-full sm:w-auto">Cancel</Button>
             {!existing && (
-              <Button variant="soft" onClick={() => submit(true)()} disabled={busy}>
+              <Button variant="soft" onClick={() => submit(true)()} disabled={busy} className="w-full sm:w-auto">
                 Save & add another
               </Button>
             )}
-            <Button type="submit" variant="primary" loading={busy}>
+            <Button type="submit" variant="primary" loading={busy} className="w-full sm:w-auto">
               {existing ? 'Save changes' : 'Add transaction'}
             </Button>
           </div>

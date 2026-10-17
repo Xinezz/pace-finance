@@ -41,7 +41,7 @@ function AttentionRow({ tx, selected, onToggle, mode }: { tx: Transaction; selec
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <input type="checkbox" checked={selected} onChange={() => onToggle(tx.id)} aria-label={`Select ${tx.description}`} className="h-4 w-4 shrink-0 accent-[var(--c-sage-deep)]" />
         <div className="min-w-0 flex-1">
-          <button type="button" onClick={() => openEditTx(tx.id)} className="block max-w-full truncate text-left font-medium text-ink hover:underline">
+          <button type="button" onClick={() => openEditTx(tx.id)} className="-my-1 block max-w-full truncate py-1 text-left font-medium text-ink hover:underline">
             {tx.description}
           </button>
           <p className="text-xs text-muted">
@@ -173,7 +173,7 @@ export function NeedsAttention({ limit = 5, hideWhenEmpty }: Props) {
               Confirm all
             </Button>
           )}
-          <button type="button" className="ml-auto text-xs font-medium text-sage-deep hover:underline" onClick={() => setSelected(new Set())}>
+          <button type="button" className="tap ml-auto text-xs font-medium text-sage-deep hover:underline" onClick={() => setSelected(new Set())}>
             Clear
           </button>
         </div>
@@ -187,14 +187,14 @@ export function NeedsAttention({ limit = 5, hideWhenEmpty }: Props) {
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
         {list.length > limit ? (
-          <button type="button" className="text-sm font-medium text-sage-deep hover:underline" onClick={() => setExpanded((e) => !e)}>
+          <button type="button" className="tap text-sm font-medium text-sage-deep hover:underline" onClick={() => setExpanded((e) => !e)}>
             {expanded ? 'Show fewer' : `Show all ${list.length}`}
           </button>
         ) : (
           <span />
         )}
         {list.length > 1 && (
-          <button type="button" className="text-sm text-muted hover:text-ink hover:underline" onClick={() => setSelected(selected.size === list.length ? new Set() : new Set(list.map((t) => t.id)))}>
+          <button type="button" className="tap text-sm text-muted hover:text-ink hover:underline" onClick={() => setSelected(selected.size === list.length ? new Set() : new Set(list.map((t) => t.id)))}>
             {selected.size === list.length ? 'Deselect all' : 'Select all'}
           </button>
         )}

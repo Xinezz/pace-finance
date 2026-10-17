@@ -177,7 +177,7 @@ export function AnalyticsPage() {
         {breakdown.rows.length === 0 ? (
           <EmptyState compact title="No spending in this period">Try a longer range, or add some expenses.</EmptyState>
         ) : (
-          <div className="grid items-center gap-6 lg:grid-cols-2">
+          <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-2">
             <DonutChart data={donutData} total={breakdown.total} selectedId={selectedCat} onSelect={(id) => setSelectedCat((c) => (c === id ? null : id))} height={300} />
             <div>
               <ul className="flex flex-col" aria-label="Categories, with amount and share of spending">
@@ -234,16 +234,16 @@ export function AnalyticsPage() {
             title={<span className="inline-flex items-center gap-1.5">Spending distribution <InfoTip text="Each category's share = the category's spending ÷ total spending × 100. Refunds are netted off their category." /></span>}
             subtitle="Ranked by share of your total spending"
           />
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[34rem] text-left text-sm">
+          <div className="scroll-x relative overflow-x-auto">
+            <table className="w-full text-left text-sm sm:min-w-[34rem]">
               <caption className="sr-only">Spending by category with share, number of transactions, and average transaction</caption>
               <thead className="text-xs text-muted">
                 <tr>
                   <th scope="col" className="pb-2 font-medium">Category</th>
                   <th scope="col" className="w-[34%] pb-2 font-medium">Share of spending</th>
                   <th scope="col" className="pb-2 text-right font-medium">Amount</th>
-                  <th scope="col" className="pb-2 text-right font-medium">Transactions</th>
-                  <th scope="col" className="pb-2 text-right font-medium">Average</th>
+                  <th scope="col" className="hidden pb-2 text-right font-medium sm:table-cell">Transactions</th>
+                  <th scope="col" className="hidden pb-2 text-right font-medium sm:table-cell">Average</th>
                 </tr>
               </thead>
               <tbody>
@@ -252,7 +252,7 @@ export function AnalyticsPage() {
                   const d = detail.get(row.categoryId);
                   return (
                     <tr key={row.categoryId} className="border-t border-line">
-                      <td className="py-2.5 pr-3"><span className="flex items-center gap-2.5"><CategoryIcon category={c} size={30} /><span className="truncate font-medium text-ink">{c?.name}</span></span></td>
+                      <td className="py-2.5 pr-3"><span className="flex items-center gap-2.5"><CategoryIcon category={c} size={30} /><span className="font-medium text-ink">{c?.name}</span></span></td>
                       <td className="py-2.5 pr-4">
                         <div className="flex items-center gap-2">
                           <ProgressBar pct={row.pct} color={c?.color} label={`${c?.name} share`} className="flex-1" height="sm" />
@@ -260,8 +260,8 @@ export function AnalyticsPage() {
                         </div>
                       </td>
                       <td className="py-2.5 text-right tabular-nums text-ink">{fmt(row.amount)}</td>
-                      <td className="py-2.5 text-right tabular-nums text-muted">{d?.count ?? row.count}</td>
-                      <td className="py-2.5 text-right tabular-nums text-muted">{d && d.count > 0 ? fmt(Math.round(row.amount / d.count)) : '-'}</td>
+                      <td className="hidden py-2.5 text-right tabular-nums text-muted sm:table-cell">{d?.count ?? row.count}</td>
+                      <td className="hidden py-2.5 text-right tabular-nums text-muted sm:table-cell">{d && d.count > 0 ? fmt(Math.round(row.amount / d.count)) : '-'}</td>
                     </tr>
                   );
                 })}
@@ -271,8 +271,8 @@ export function AnalyticsPage() {
                   <td className="pt-3">Total</td>
                   <td className="pt-3 tabular-nums">100%</td>
                   <td className="pt-3 text-right tabular-nums">{fmt(breakdown.total)}</td>
-                  <td className="pt-3 text-right tabular-nums text-muted">{[...detail.values()].reduce((s, d) => s + d.count, 0)}</td>
-                  <td />
+                  <td className="hidden pt-3 text-right tabular-nums text-muted sm:table-cell">{[...detail.values()].reduce((s, d) => s + d.count, 0)}</td>
+                  <td className="hidden sm:table-cell" />
                 </tr>
               </tfoot>
             </table>
@@ -346,7 +346,7 @@ export function AnalyticsPage() {
         {trends.length === 0 ? (
           <EmptyState compact title="No category history yet">Trends appear once you have spending in more than one month.</EmptyState>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="scroll-x relative overflow-x-auto">
             <table className="w-full min-w-[40rem] text-left text-sm">
               <caption className="sr-only">Category spending compared with the previous period, with 6-month average</caption>
               <thead className="text-xs text-muted">
@@ -391,13 +391,13 @@ export function AnalyticsPage() {
       {/* E. Insights */}
       <Card aria-labelledby="ins-title">
         <CardHeader id="ins-title" icon={<Lightbulb size={17} />} title="Insights" subtitle={`About ${formatMonthLabel(month)}, calculated from your transactions`} />
-        <ul className="grid gap-3 sm:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {insights.map((i) => (
             <li key={i.id} className="flex items-start gap-3 rounded-2xl bg-surface2/60 p-3.5">
               <span className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs ${TONE[i.tone]}`} aria-hidden>{i.tone === 'good' ? '✓' : i.tone === 'attention' ? '!' : 'i'}</span>
               <p className="text-sm leading-snug text-body">
                 {i.text}
-                {i.link && <button type="button" className="ml-1.5 font-medium text-sage-deep hover:underline" onClick={() => navigate(i.link!.to)}>{i.link.label} →</button>}
+                {i.link && <button type="button" className="tap ml-1.5 font-medium text-sage-deep hover:underline" onClick={() => navigate(i.link!.to)}>{i.link.label} →</button>}
               </p>
             </li>
           ))}

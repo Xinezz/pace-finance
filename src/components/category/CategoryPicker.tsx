@@ -41,7 +41,8 @@ export function CategoryPanel({ categories, value, onSelect, onCreate, autoFocus
         <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden />
         <input
           type="search"
-          autoFocus={autoFocusSearch}
+          // On touch screens the keyboard would cover the list, so only jump into search with a mouse/trackpad.
+          autoFocus={autoFocusSearch && window.matchMedia('(pointer: fine)').matches}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => {
@@ -55,7 +56,7 @@ export function CategoryPanel({ categories, value, onSelect, onCreate, autoFocus
           className="h-9 w-full rounded-xl border border-line2 bg-surface pl-9 pr-3 text-body placeholder:text-muted/70 focus:border-sage-deep focus:outline-none focus:ring-2 focus:ring-sage/40"
         />
       </div>
-      <div ref={listRef} role="listbox" aria-label="Categories" className={`grid gap-0.5 ${columns === 2 ? 'sm:grid-cols-2' : ''}`}>
+      <div ref={listRef} role="listbox" aria-label="Categories" className={`grid grid-cols-1 gap-0.5 ${columns === 2 ? 'sm:grid-cols-2' : ''}`}>
         {filtered.map((c) => (
           <button
             key={c.id}
@@ -187,7 +188,7 @@ export function CategoryChipButton({ txType, value, onSelect, attention, suggest
           e.stopPropagation();
           setOpen((o) => !o);
         }}
-        className={`group inline-flex max-w-full items-center gap-1 rounded-full transition-all hover:brightness-95 focus-visible:ring-2 focus-visible:ring-sage-deep ${attention ? 'ring-1 ring-dashed ring-peach-deep/70' : ''}`}
+        className={`tap group inline-flex max-w-full items-center gap-1 rounded-full transition-all hover:brightness-95 focus-visible:ring-2 focus-visible:ring-sage-deep ${attention ? 'ring-1 ring-dashed ring-peach-deep/70' : ''}`}
       >
         <CategoryChip category={selected} size={size} />
         {suggested && (
@@ -195,7 +196,7 @@ export function CategoryChipButton({ txType, value, onSelect, attention, suggest
             auto
           </span>
         )}
-        <ChevronDown size={12} className="-ml-0.5 shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" aria-hidden />
+        <ChevronDown size={12} className="-ml-0.5 shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 pointer-coarse:opacity-100" aria-hidden />
       </button>
       <Popover anchorRef={ref} open={open} onClose={() => setOpen(false)} label="Choose a category" width={300}>
         <CategoryPanel

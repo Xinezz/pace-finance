@@ -68,7 +68,7 @@ export function GoalModal({ goal, onClose }: { goal?: Goal; onClose: () => void 
         <Field label="Goal name" required error={errors.name}>
           <TextInput value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Emergency fund, Holiday, New laptop" maxLength={50} data-autofocus />
         </Field>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Target amount" required error={errors.target}>
             <MoneyInput value={target} onChange={setTarget} currency={currency} />
           </Field>

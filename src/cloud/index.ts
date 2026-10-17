@@ -35,8 +35,9 @@ export function loadCloud(): Promise<CloudApi | null> {
   if (!cached) {
     cached = (async () => {
       // The fake is development-only. `import.meta.env.DEV` is false in production builds, so this
-      // whole branch (and mockCloud.ts) is removed from them.
-      if (isMock()) {
+      // whole branch (and mockCloud.ts) is removed from them. (Written out rather than calling isMock()
+      // so the bundler can see the condition is constant and drop the chunk.)
+      if (import.meta.env.DEV && import.meta.env.VITE_CLOUD === 'mock') {
         const { createMockCloud } = await import('./mockCloud');
         const mock = createMockCloud();
         (window as unknown as { __paceMockCloud?: unknown }).__paceMockCloud = mock;

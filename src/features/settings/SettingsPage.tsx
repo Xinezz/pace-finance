@@ -241,7 +241,7 @@ function AccountsSection() {
         ))}
       </ul>
       {editing && (
-        <form className="mt-3 grid gap-3 rounded-2xl bg-surface2 p-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save(); }}>
+        <form className="mt-3 grid grid-cols-1 gap-3 rounded-2xl bg-surface2 p-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save(); }}>
           <Field label="Account name" required error={error}><TextInput value={name} onChange={(e) => setName(e.target.value)} maxLength={40} data-autofocus autoFocus /></Field>
           <Field label="Opening balance" hint="Money in the account before your first recorded transaction."><MoneyInput value={balance} onChange={setBalance} currency={currency} /></Field>
           {editing === 'new' && (
@@ -281,7 +281,7 @@ function CategoriesSection() {
 
   return (
     <Section id="categories" title="Categories" subtitle="Rename, recolour, or add your own. Built-in categories keep their names." icon={<Sparkles size={17} />} action={<Button size="sm" icon={<Plus size={14} />} onClick={() => setEditing('new')}>New category</Button>}>
-      <ul className="grid gap-x-6 sm:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
         {data.categories.map((c) => (
           <li key={c.id} className="flex items-center gap-3 border-b border-line py-2.5">
             <CategoryIcon category={c} size={36} />
@@ -384,7 +384,7 @@ function QuickSection() {
           {data.quickActions.length === 0 && <li className="text-sm text-muted">No quick actions. Add one for your morning coffee or weekly shop.</li>}
         </ul>
         {adding && (
-          <form className="mt-4 grid gap-3 rounded-2xl bg-surface2 p-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); create(); }}>
+          <form className="mt-4 grid grid-cols-1 gap-3 rounded-2xl bg-surface2 p-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); create(); }}>
             <Field label="Name" required><TextInput value={label} onChange={(e) => setLabel(e.target.value)} maxLength={20} placeholder="e.g. Bubble tea" data-autofocus /></Field>
             <Field label="Emoji"><TextInput value={emoji} onChange={(e) => setEmoji(e.target.value)} maxLength={4} /></Field>
             <Field label="Type"><Select value={type} onChange={(e) => { const t = e.target.value as TxType; setType(t); setCategoryId(t === 'income' ? 'salary' : 'food'); }}><option value="expense">Expense</option><option value="income">Income</option></Select></Field>
@@ -496,7 +496,7 @@ function DataSection() {
   return (
     <Section id="data" title="Your data" subtitle={storeKind === 'cloud' ? 'Saved to your account. Back it up whenever you like.' : 'Stored only in this browser. Back it up whenever you like.'} icon={<Database size={17} />}>
       <div className="flex flex-col gap-6">
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="rounded-2xl border border-line p-4">
             <p className="font-medium text-ink">Backup</p>
             <p className="mt-1 text-sm text-muted">Download everything as one JSON file, and restore it on any device.</p>
@@ -573,7 +573,7 @@ function PreferencesSection() {
 
   return (
     <Section id="preferences" title="Preferences" subtitle="Make Pace feel like yours">
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Field label="Your name" hint="Used in the greeting.">
           <TextInput value={name} onChange={(e) => setName(e.target.value)} onBlur={() => name !== s.userName && dispatch({ type: 'updateSettings', patch: { userName: name.trim() } })} maxLength={40} />
         </Field>

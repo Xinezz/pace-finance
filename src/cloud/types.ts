@@ -3,6 +3,7 @@
  * fake implements it for development and tests. Swapping providers later means writing one more
  * implementation of `CloudApi`; no screen or store changes.
  */
+import type { EmailLinkOutcome } from './emailLink';
 
 export interface CloudUser {
   id: string;
@@ -10,6 +11,8 @@ export interface CloudUser {
 }
 
 export type AuthEvent = 'signed-in' | 'signed-out' | 'password-recovery';
+
+export type { EmailLinkOutcome };
 
 export interface AuthResult {
   ok: boolean;
@@ -36,6 +39,11 @@ export interface DocumentGateway {
 export interface CloudApi {
   readonly kind: 'supabase' | 'mock';
   getUser(): Promise<CloudUser | null>;
+  /**
+   * Finishes the sign-up confirmation or password-reset link this page was opened from, if any, and tidies
+   * the address bar. Safe to call more than once: the link is only used the first time.
+   */
+  completeEmailLink(): Promise<EmailLinkOutcome>;
   /** Returns an unsubscribe function. */
   onAuthChange(cb: (event: AuthEvent, user: CloudUser | null) => void): () => void;
   signUp(email: string, password: string): Promise<AuthResult>;

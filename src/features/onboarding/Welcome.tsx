@@ -8,11 +8,14 @@ import { Button } from '../../components/ui/Button';
 const POINTS = [
   { icon: <Tags size={18} />, title: 'You decide where things belong', text: 'Categorize in one tap, bulk edit, and teach Pace your habits. Nothing you choose is ever overridden.' },
   { icon: <PiggyBank size={18} />, title: 'Watch your savings grow', text: 'Set goals, track progress, and see exactly what you’ve got left after spending.' },
-  { icon: <LockKeyhole size={18} />, title: 'Private by design', text: 'Everything stays in this browser. No bank logins, no accounts, no tracking.' },
 ];
 
+const PRIVATE_LOCAL = { icon: <LockKeyhole size={18} />, title: 'Private by design', text: 'Everything stays in this browser. No bank logins, no accounts, no tracking.' };
+const PRIVATE_CLOUD = { icon: <LockKeyhole size={18} />, title: 'Private by design', text: 'Saved to your own account, which only you can read, on any device. No bank logins, no tracking.' };
+
 export function Welcome() {
-  const { dispatch } = useStore();
+  const { dispatch, storeKind } = useStore();
+  const points = [...POINTS, storeKind === 'cloud' ? PRIVATE_CLOUD : PRIVATE_LOCAL];
 
   return (
     <div className="relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-5 py-12">
@@ -39,7 +42,7 @@ export function Welcome() {
         </p>
 
         <ul className="mt-9 flex w-full flex-col gap-3 text-left">
-          {POINTS.map((p) => (
+          {points.map((p) => (
             <li key={p.title} className="flex items-start gap-4 rounded-2xl border border-line bg-surface/80 p-4 backdrop-blur">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-sage-soft text-sage-deep">{p.icon}</span>
               <div>

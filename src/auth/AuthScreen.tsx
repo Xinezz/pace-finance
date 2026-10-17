@@ -1,4 +1,4 @@
-import { ArrowLeft, Mail, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Mail, ShieldCheck, X } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Logo } from '../components/layout/nav';
 import { Button } from '../components/ui/Button';
@@ -12,6 +12,9 @@ type Mode = 'signin' | 'signup' | 'forgot' | 'reset-sent' | 'confirm';
 /** After this many wrong tries in a row we pause for a moment. (The server enforces real limits too.) */
 const MAX_FAILURES = 5;
 const COOLDOWN_SECONDS = 30;
+
+/** Jump into the first field only with a mouse or trackpad; on phones the keyboard would cover the screen. */
+const finePointer = () => window.matchMedia('(pointer: fine)').matches;
 
 function Backdrop({ children }: { children: ReactNode }) {
   return (
@@ -34,6 +37,21 @@ function Backdrop({ children }: { children: ReactNode }) {
 
 function Card({ children }: { children: ReactNode }) {
   return <div className="rounded-[1.5rem] border border-line bg-surface p-6 shadow-[var(--shadow-card)] sm:p-8">{children}</div>;
+}
+
+/** Why an email link didn't work, for example. */
+function Notice() {
+  const { notice, dismissNotice } = useAuth();
+  if (!notice) return null;
+  return (
+    <div role="alert" className="mb-4 flex items-start gap-3 rounded-2xl border border-peach/60 bg-peach-soft px-4 py-3 text-sm leading-relaxed text-peach-deep">
+      <AlertTriangle size={18} className="mt-0.5 shrink-0" aria-hidden />
+      <p className="min-w-0 flex-1">{notice}</p>
+      <button type="button" aria-label="Dismiss" onClick={dismissNotice} className="-m-1.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg hover:bg-peach/30">
+        <X size={15} />
+      </button>
+    </div>
+  );
 }
 
 function MockBanner() {
@@ -150,6 +168,7 @@ export function AuthScreen() {
   return (
     <Backdrop>
       <MockBanner />
+      <Notice />
       <Card>
         {!forgot && (
           <Segmented<'signin' | 'signup'>
@@ -176,7 +195,7 @@ export function AuthScreen() {
             </p>
           )}
           <Field label="Email" required error={errors.email}>
-            <TextInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" autoCapitalize="none" spellCheck={false} placeholder="you@example.com" autoFocus />
+            <TextInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" autoCapitalize="none" spellCheck={false} placeholder="you@example.com" autoFocus={finePointer()} />
           </Field>
 
           {!forgot && (
@@ -198,12 +217,12 @@ export function AuthScreen() {
           </Button>
 
           {mode === 'signin' && (
-            <button type="button" onClick={() => go('forgot')} className="self-center text-sm font-medium text-sage-deep hover:underline">
+            <button type="button" onClick={() => go('forgot')} className="tap self-center text-sm font-medium text-sage-deep hover:underline">
               Forgot your password?
             </button>
           )}
           {forgot && (
-            <button type="button" onClick={() => go('signin')} className="inline-flex items-center gap-1.5 self-center text-sm font-medium text-sage-deep hover:underline">
+            <button type="button" onClick={() => go('signin')} className="tap inline-flex items-center gap-1.5 self-center text-sm font-medium text-sage-deep hover:underline">
               <ArrowLeft size={14} aria-hidden /> Back to sign in
             </button>
           )}
@@ -220,7 +239,7 @@ export function AuthScreen() {
       {!forgot && (
         <p className="mt-5 text-center text-sm text-muted">
           Just looking around?{' '}
-          <button type="button" onClick={auth.continueAsGuest} className="font-medium text-sage-deep underline-offset-2 hover:underline">
+          <button type="button" onClick={auth.continueAsGuest} className="tap font-medium text-sage-deep underline-offset-2 hover:underline">
             Continue without an account
           </button>
           <span className="mt-1 block text-xs">Your data then stays only in this browser: no sign-in, no sync.</span>
@@ -269,7 +288,7 @@ export function RecoveryScreen() {
             </p>
           )}
           <Field label="New password" required error={errors.password}>
-            <PasswordInput value={password} onChange={setPassword} autoComplete="new-password" autoFocus />
+            <PasswordInput value={password} onChange={setPassword} autoComplete="new-password" autoFocus={finePointer()} />
           </Field>
           <StrengthMeter password={password} email={auth.user?.email} />
           <Field label="Confirm new password" required error={errors.confirm}>
@@ -278,7 +297,7 @@ export function RecoveryScreen() {
           <Button type="submit" variant="primary" size="lg" loading={busy}>
             Save and continue
           </Button>
-          <button type="button" onClick={() => void auth.signOut()} className="self-center text-sm text-muted hover:text-ink hover:underline">
+          <button type="button" onClick={() => void auth.signOut()} className="tap self-center text-sm text-muted hover:text-ink hover:underline">
             Cancel and sign out
           </button>
         </form>

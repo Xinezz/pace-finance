@@ -71,6 +71,14 @@ export function CalendarPage() {
     requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-day="${next}"]`)?.focus());
   };
 
+  // On phones the day's details sit below the calendar, so bring them into view.
+  const showDay = (date: string) => {
+    setSelected(date);
+    if (window.matchMedia('(max-width: 1023px)').matches) {
+      requestAnimationFrame(() => document.getElementById('day-detail')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    }
+  };
+
   const labels = weekdayLabels(weekStartsOn);
 
   if (data.transactions.length === 0) {
@@ -86,9 +94,10 @@ export function CalendarPage() {
     <div className="flex flex-col gap-6">
       <PageHeader title="Calendar" subtitle={`${formatMonthLabel(month)} · click a day to see what happened`} />
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="flex flex-col gap-6 lg:col-span-2">
-          <Card className="!p-3 sm:!p-5" aria-label={`Calendar for ${formatMonthLabel(month)}`}>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Phones: calendar, then the chosen day, then the long timeline. Wide screens keep two columns. */}
+        <div className="contents lg:col-span-2 lg:flex lg:flex-col lg:gap-6">
+          <Card className="order-1 !p-3 sm:!p-5" aria-label={`Calendar for ${formatMonthLabel(month)}`}>
             <div className="mb-2 grid grid-cols-7 gap-1 sm:gap-1.5" aria-hidden>
               {labels.map((l) => <div key={l} className="py-1 text-center text-[11px] font-medium uppercase tracking-wide text-muted">{l.slice(0, 3)}</div>)}
             </div>
@@ -113,7 +122,7 @@ export function CalendarPage() {
                     aria-selected={isSel}
                     aria-current={isToday ? 'date' : undefined}
                     tabIndex={isSel ? 0 : -1}
-                    onClick={() => setSelected(date)}
+                    onClick={() => showDay(date)}
                     onKeyDown={(e) => onKey(e, date)}
                     className={`relative flex min-h-14 flex-col items-stretch rounded-xl border p-1 text-left transition-all sm:min-h-[5.25rem] sm:p-2 ${isSel ? 'border-ink shadow-[var(--shadow-card)]' : 'border-line hover:border-line2'} ${isToday ? 'ring-2 ring-sage-deep/60 ring-offset-1 ring-offset-surface' : ''}`}
                     style={{ background: heat ? `color-mix(in srgb, var(--c-peach) ${Math.round(heat * 100)}%, var(--c-surface))` : 'var(--c-surface)' }}
@@ -149,7 +158,7 @@ export function CalendarPage() {
             </ul>
           </Card>
 
-          <Card aria-labelledby="timeline-title">
+          <Card aria-labelledby="timeline-title" className="order-3">
             <CardHeader id="timeline-title" title="Activity timeline" subtitle={`Everything recorded in ${formatMonthLabel(month)}, newest first`} />
             {timeline.length === 0 ? (
               <EmptyState compact title="Nothing this month yet">Transactions will appear here as a timeline.</EmptyState>
@@ -161,7 +170,7 @@ export function CalendarPage() {
                     <li key={date} className="relative pb-5 last:pb-0">
                       <span className="absolute -left-[1.62rem] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-sage-deep" aria-hidden />
                       <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
-                        <button type="button" onClick={() => setSelected(date)} className="text-sm font-semibold text-ink hover:underline">{formatDayHeading(date, today)}</button>
+                        <button type="button" onClick={() => showDay(date)} className="tap text-sm font-semibold text-ink hover:underline">{formatDayHeading(date, today)}</button>
                         <span className="text-xs tabular-nums text-muted">{day && day.expenses > 0 ? `spent ${fmt(day.expenses)}` : ''}{day && day.income > 0 ? ` · received ${fmt(day.income)}` : ''}</span>
                       </div>
                       <div className="-mx-2">{list.map((t) => <TransactionRow key={t.id} tx={t} category={catMap.get(t.categoryId)} accounts={data.accounts} showDate={false} />)}</div>
@@ -176,8 +185,8 @@ export function CalendarPage() {
           </Card>
         </div>
 
-        <div className="flex flex-col gap-6">
-          <Card aria-labelledby="day-title" className="lg:sticky lg:top-20">
+        <div className="order-2 flex flex-col gap-6">
+          <Card id="day-detail" aria-labelledby="day-title" className="scroll-mt-20 lg:sticky lg:top-20">
             <CardHeader
               id="day-title"
               title={formatDayHeading(selected, today)}
@@ -204,7 +213,7 @@ export function CalendarPage() {
               <div><dt className="text-xs text-muted">Spent</dt><dd className="font-semibold tabular-nums text-ink">{fmt(m.summary.expenses)}</dd></div>
               <div><dt className="text-xs text-muted">Received</dt><dd className="font-semibold tabular-nums text-sage-deep">{fmt(m.summary.income)}</dd></div>
               <div><dt className="text-xs text-muted">Daily average</dt><dd className="font-semibold tabular-nums text-ink">{avgDaily === null ? '-' : fmt(avgDaily)}</dd></div>
-              <div><dt className="text-xs text-muted">Busiest day</dt><dd className="font-semibold text-ink">{busiest ? <button type="button" className="hover:underline" onClick={() => setSelected(busiest[0])}>{formatDate(busiest[0], { day: 'numeric', month: 'short' })} · {fmt(busiest[1].expenses, { trimWhole: true })}</button> : '-'}</dd></div>
+              <div><dt className="text-xs text-muted">Busiest day</dt><dd className="font-semibold text-ink">{busiest ? <button type="button" className="tap hover:underline" onClick={() => showDay(busiest[0])}>{formatDate(busiest[0], { day: 'numeric', month: 'short' })} · {fmt(busiest[1].expenses, { trimWhole: true })}</button> : '-'}</dd></div>
             </dl>
             {unusual.size > 0 && (
               <div className="mt-4 border-t border-line pt-3">
@@ -224,7 +233,7 @@ export function CalendarPage() {
                   <li key={g.key} className="flex items-center gap-3">
                     <CategoryIcon category={catMap.get(g.categoryId)} size={34} />
                     <div className="min-w-0 flex-1">
-                      <button type="button" className="block max-w-full truncate text-left text-sm font-medium text-ink hover:underline" onClick={() => navigate(`/transactions?q=${encodeURIComponent(g.label)}&period=all`)}>{g.label}</button>
+                      <button type="button" className="-my-1 block max-w-full truncate py-1 text-left text-sm font-medium text-ink hover:underline" onClick={() => navigate(`/transactions?q=${encodeURIComponent(g.label)}&period=all`)}>{g.label}</button>
                       <p className="text-xs text-muted">around the {g.typicalDay}{ordinal(g.typicalDay)} · {g.months} months</p>
                     </div>
                     <span className="text-sm tabular-nums text-ink">{fmt(g.typicalAmount, { trimWhole: true })}</span>

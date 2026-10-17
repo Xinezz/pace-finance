@@ -245,6 +245,8 @@ dialog.pace-dialog::backdrop {
     margin: auto 0 0 0;
     border-radius: 1.5rem 1.5rem 0 0;
     max-height: 92dvh;
+    /* keep the last button clear of the iPhone home bar */
+    padding-bottom: env(safe-area-inset-bottom);
   }
   dialog.pace-dialog[open] {
     animation: sheet-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -261,6 +263,45 @@ input, select, textarea { font-size: 16px; }
   input, select, textarea { font-size: 14px; }
 }
 input[type='number']::-webkit-inner-spin-button { display: none; }
+
+/* iOS Safari draws date fields centred, collapses them when empty and ignores the field height. */
+input[type='date'] { -webkit-appearance: none; appearance: none; min-height: 2.5rem; }
+input[type='date']::-webkit-date-and-time-value { text-align: left; }
+
+/* ------------------------------------------------------------------ */
+/* Touch screens                                                       */
+/* ------------------------------------------------------------------ */
+
+/* Page gutters that also clear the notch / rounded corners when a phone is held sideways. */
+.page-x {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+@media (min-width: 640px) {
+  .page-x { padding-left: max(1.5rem, env(safe-area-inset-left)); padding-right: max(1.5rem, env(safe-area-inset-right)); }
+}
+@media (min-width: 1024px) {
+  .page-x { padding-left: max(2rem, env(safe-area-inset-left)); padding-right: max(2rem, env(safe-area-inset-right)); }
+}
+
+/* Tables that scroll sideways: a soft shadow on whichever edge has more to see (it fades out at the ends). */
+.scroll-x {
+  background:
+    linear-gradient(to right, var(--c-surface) 40%, transparent) left / 2rem 100% no-repeat local,
+    linear-gradient(to left, var(--c-surface) 40%, transparent) right / 2rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, color-mix(in srgb, var(--c-ink) 14%, transparent), transparent) left / 0.75rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, color-mix(in srgb, var(--c-ink) 14%, transparent), transparent) right / 0.75rem 100% no-repeat scroll;
+}
+
+@media (pointer: coarse) {
+  /* Small controls get a taller invisible touch area, so they're easy to hit without looking bigger. */
+  .tap { position: relative; }
+  .tap::after { content: ''; position: absolute; inset: -0.5rem -0.25rem; }
+  /* While typing, the on-screen keyboard needs the room: tuck the bottom tab bar away. */
+  body:has(:is(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='button'], [type='submit']), textarea, select):focus) .mobile-nav { display: none; }
+  /* Checkboxes big enough for a fingertip. */
+  input[type='checkbox'] { width: 1.5rem; height: 1.5rem; }
+}
 
 /* ------------------------------------------------------------------ */
 /* Print: the Reports page doubles as a printable summary              */

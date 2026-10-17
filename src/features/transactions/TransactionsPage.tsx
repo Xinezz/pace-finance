@@ -191,7 +191,7 @@ export function TransactionsPage() {
         )}
 
         {showFilters && (
-          <div className="mt-3 grid gap-2 border-t border-line pt-3 sm:grid-cols-2 lg:grid-cols-4 [animation:fade-in_0.15s_ease_both]">
+          <div className="mt-3 grid grid-cols-1 gap-2 border-t border-line pt-3 sm:grid-cols-2 lg:grid-cols-4 [animation:fade-in_0.15s_ease_both]">
             <Select aria-label="Type" value={filter.type} onChange={(e) => patch({ type: e.target.value as TxFilter['type'] })}>
               <option value="all">Income & expenses & transfers</option>
               <option value="expense">Expenses only</option>
@@ -225,7 +225,7 @@ export function TransactionsPage() {
           <p className="text-muted">
             <strong className="font-semibold text-ink">{sorted.length}</strong> transaction{sorted.length === 1 ? '' : 's'} · {periodLabel}
             {active && (
-              <button type="button" className="ml-3 inline-flex items-center gap-1 font-medium text-sage-deep hover:underline" onClick={clearAll}>
+              <button type="button" className="tap ml-3 inline-flex items-center gap-1 font-medium text-sage-deep hover:underline" onClick={clearAll}>
                 <X size={12} /> Clear filters
               </button>
             )}
@@ -247,7 +247,7 @@ export function TransactionsPage() {
           <Button size="sm" variant="danger" icon={<Trash2 size={13} />} onClick={deleteChosen}>
             Delete
           </Button>
-          <button type="button" className="ml-auto text-sm font-medium text-sage-deep hover:underline" onClick={() => setSelected(new Set())}>
+          <button type="button" className="tap ml-auto text-sm font-medium text-sage-deep hover:underline" onClick={() => setSelected(new Set())}>
             Clear selection
           </button>
         </div>

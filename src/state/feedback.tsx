@@ -79,7 +79,7 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
     <FeedbackContext.Provider value={api}>
       {children}
       <div
-        className="no-print pointer-events-none fixed inset-x-0 bottom-20 z-[100] flex flex-col items-center gap-2 px-4 lg:bottom-6"
+        className="no-print pointer-events-none fixed inset-x-0 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-[100] flex flex-col items-center gap-2 px-4 lg:bottom-6"
         role="region"
         aria-label="Notifications"
       >
@@ -103,7 +103,7 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
                 {a.label}
               </button>
             ))}
-            <button aria-label="Dismiss" className="rounded-md p-1 text-muted hover:text-ink" onClick={() => dismiss(t.id)}>
+            <button aria-label="Dismiss" className="-mr-1.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg text-muted hover:text-ink" onClick={() => dismiss(t.id)}>
               <X size={14} />
             </button>
           </div>
