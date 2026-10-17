@@ -1,5 +1,6 @@
 import { AlertTriangle, ArrowLeft, Mail, ShieldCheck, X } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { AccountStrip } from '../components/account/AccountStrip';
 import { Logo } from '../components/layout/nav';
 import { Button } from '../components/ui/Button';
 import { Field, Segmented, TextInput } from '../components/ui/Form';
@@ -18,7 +19,8 @@ const finePointer = () => window.matchMedia('(pointer: fine)').matches;
 
 function Backdrop({ children }: { children: ReactNode }) {
   return (
-    <div className="relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-4 py-10">
+    <div className="relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-4 py-16">
+      <AccountStrip />
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-sage/30 blur-3xl" />
         <div className="absolute -right-20 top-1/3 h-80 w-80 rounded-full bg-blue/30 blur-3xl" />

@@ -24,6 +24,7 @@ import { downloadText } from '../../lib/download';
 import { parseBackup } from '../../storage/sanitize';
 import { useFeedback } from '../../state/feedback';
 import { useMoney, useStore } from '../../state/store';
+import { useTheme } from '../../state/theme';
 import { useUi } from '../../state/ui';
 
 function Section({ id, title, subtitle, icon, children, action }: { id: string; title: string; subtitle?: string; icon?: ReactNode; children: ReactNode; action?: ReactNode }) {
@@ -552,6 +553,7 @@ function DataSection() {
 function PreferencesSection() {
   const { data, dispatch } = useStore();
   const { toast, confirm } = useFeedback();
+  const { theme, setTheme } = useTheme();
   const s = data.settings;
   const [name, setName] = useState(s.userName);
 
@@ -584,7 +586,8 @@ function PreferencesSection() {
         </Field>
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] font-medium text-ink">Theme</span>
-          <Segmented<ThemeSetting> ariaLabel="Theme" value={s.theme} onChange={(theme) => dispatch({ type: 'updateSettings', patch: { theme } })} options={[{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }, { value: 'system', label: 'Match device' }]} />
+          <Segmented<ThemeSetting> ariaLabel="Theme" value={theme} onChange={setTheme} options={[{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }, { value: 'system', label: 'Match device' }]} />
+          <span className="text-xs text-muted">Saved on this device, so your phone and computer can differ.</span>
         </div>
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] font-medium text-ink">Week starts on</span>

@@ -3,13 +3,15 @@ import { useRef, useState } from 'react';
 import { useAuth } from '../../auth/AuthProvider';
 import { useExportBackup } from '../../hooks/useBackup';
 import { useStore } from '../../state/store';
+import { useTheme } from '../../state/theme';
 import { useUi } from '../../state/ui';
 import type { ThemeSetting } from '../../domain/types';
 import { Segmented } from '../ui/Form';
 import { Popover } from '../ui/Popover';
 
 export function ProfileMenu() {
-  const { data, dispatch } = useStore();
+  const { data } = useStore();
+  const { theme, setTheme } = useTheme();
   const { navigate } = useUi();
   const auth = useAuth();
   const exportBackup = useExportBackup();
@@ -46,8 +48,8 @@ export function ProfileMenu() {
               ariaLabel="Colour theme"
               size="sm"
               className="w-full [&>button]:flex-1"
-              value={data.settings.theme}
-              onChange={(theme) => dispatch({ type: 'updateSettings', patch: { theme } })}
+              value={theme}
+              onChange={setTheme}
               options={[
                 { value: 'light', label: <span className="inline-flex items-center gap-1"><Sun size={12} /> Light</span> },
                 { value: 'dark', label: <span className="inline-flex items-center gap-1"><Moon size={12} /> Dark</span> },
