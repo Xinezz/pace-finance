@@ -7,7 +7,8 @@
  * dev server and is not included in production builds.
  */
 import { hashString, uid } from '../domain/ids';
-import type { AuthEvent, AuthResult, CloudApi, CloudUser, DocumentGateway } from './types';
+import { linkErrorMessage, readEmailLink, withoutEmailLink } from './emailLink';
+import type { AuthEvent, AuthResult, CloudApi, CloudUser, DocumentGateway, EmailLinkOutcome } from './types';
 
 export interface KeyValueStorage {
   getItem(key: string): string | null;
@@ -69,6 +70,15 @@ export function createMockCloud(storage: KeyValueStorage = window.localStorage, 
 
     async getUser() {
       return publicUser(currentUser(read()));
+    },
+
+    async completeEmailLink(): Promise<EmailLinkOutcome> {
+      // The fake sends no emails, but an error link (?error_code=otp_expired) shows how failures look.
+      if (typeof window === 'undefined') return { kind: 'none' };
+      const link = readEmailLink(window.location.href);
+      if (!link) return { kind: 'none' };
+      window.history.replaceState(window.history.state, '', withoutEmailLink(window.location.href));
+      return link.errorCode ? { kind: 'error', message: linkErrorMessage(link.errorCode) } : { kind: 'none' };
     },
 
     onAuthChange(cb) {

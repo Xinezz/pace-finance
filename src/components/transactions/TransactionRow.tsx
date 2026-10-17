@@ -46,13 +46,13 @@ export const TransactionRow = memo(function TransactionRow({ tx, category, accou
           checked={!!selected}
           onChange={() => onToggle(tx.id)}
           aria-label={`Select ${tx.description}`}
-          className="h-4 w-4 shrink-0 accent-[var(--c-sage-deep)]"
+          className="relative z-[1] h-4 w-4 shrink-0 accent-[var(--c-sage-deep)]"
         />
       )}
       <CategoryIcon category={isTransfer ? category : category} size={40} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-          <button type="button" onClick={() => openEditTx(tx.id)} className="max-w-full truncate text-left text-[15px] font-medium text-ink hover:underline">
+          <button type="button" onClick={() => openEditTx(tx.id)} className="max-w-full truncate text-left text-[15px] font-medium text-ink after:absolute after:inset-0 after:rounded-2xl hover:underline">
             {tx.description}
           </button>
           {tx.isDemo && <Badge tone="butter" title="Part of the demo data">Demo</Badge>}
@@ -75,13 +75,13 @@ export const TransactionRow = memo(function TransactionRow({ tx, category, accou
           ))}
         </p>
         {!hideCategory && !isTransfer && (
-          <div className={compact ? 'mt-1.5' : 'mt-1.5 sm:hidden'}>
+          <div className={compact ? 'relative z-[1] mt-1.5 w-fit max-w-full' : 'relative z-[1] mt-1.5 w-fit max-w-full sm:hidden'}>
             <CategoryChipButton txType={tx.type} value={tx.categoryId} onSelect={(cid) => categorize([tx.id], cid)} attention={needs} suggested={tx.categorySource === 'auto'} />
           </div>
         )}
       </div>
       {!hideCategory && !isTransfer && !compact && (
-        <div className="hidden w-48 shrink-0 sm:block">
+        <div className="relative z-[1] hidden w-48 shrink-0 sm:block">
           <CategoryChipButton txType={tx.type} value={tx.categoryId} onSelect={(cid) => categorize([tx.id], cid)} attention={needs} suggested={tx.categorySource === 'auto'} />
         </div>
       )}
@@ -91,7 +91,7 @@ export const TransactionRow = memo(function TransactionRow({ tx, category, accou
           type="button"
           onClick={() => openEditTx(tx.id)}
           aria-label={`Edit ${tx.description}`}
-          className="hidden h-8 w-8 shrink-0 place-items-center rounded-lg text-muted opacity-0 transition-opacity hover:bg-surface hover:text-ink focus-visible:opacity-100 group-hover:opacity-100 sm:grid"
+          className="relative z-[1] hidden h-8 w-8 shrink-0 place-items-center rounded-lg text-muted opacity-0 transition-opacity hover:bg-surface hover:text-ink focus-visible:opacity-100 group-hover:opacity-100 sm:grid"
         >
           <Pencil size={15} />
         </button>

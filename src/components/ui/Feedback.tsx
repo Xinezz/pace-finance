@@ -1,5 +1,5 @@
 import { HelpCircle } from 'lucide-react';
-import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 type Tone = 'sage' | 'blue' | 'peach' | 'butter' | 'neutral';
 
@@ -61,30 +61,73 @@ export function EmptyState({ icon, title, children, action, compact }: { icon?: 
   );
 }
 
-/** A small "?" that explains a financial term on hover, focus, or tap. */
+/** A small "?" that explains a financial term on hover, keyboard focus, or tap. */
 export function InfoTip({ text, label = 'More information' }: { text: ReactNode; label?: string }) {
   const id = useId();
   const [open, setOpen] = useState(false);
+  const [place, setPlace] = useState({ x: 0, below: false });
+  const wrapRef = useRef<HTMLSpanElement>(null);
+  const tipRef = useRef<HTMLSpanElement>(null);
+  // The kind of pointer pressing the button right now ('' for keyboard). A tap fires hover, focus and click
+  // together, so each handler has to know whether it came from a mouse, a finger or the keyboard.
+  const pointer = useRef('');
+
+  // Keep the tip on screen: slide it sideways near the edges, and show it below when the top bar is in the way.
+  useLayoutEffect(() => {
+    const b = wrapRef.current?.getBoundingClientRect();
+    const tip = tipRef.current;
+    if (!open || !b || !tip) return;
+    const vw = document.documentElement.clientWidth;
+    const left = Math.min(Math.max(8, b.left + b.width / 2 - tip.offsetWidth / 2), vw - 8 - tip.offsetWidth);
+    setPlace({ x: Math.round(left - b.left), below: b.top - tip.offsetHeight - 8 < 72 });
+  }, [open]);
+
+  // Phones don't move focus when you tap, so close on a tap anywhere else.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [open]);
+
   return (
-    <span className="relative inline-flex align-middle" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+    <span
+      ref={wrapRef}
+      className="relative inline-flex align-middle"
+      onPointerEnter={(e) => e.pointerType === 'mouse' && setOpen(true)}
+      onPointerLeave={(e) => e.pointerType === 'mouse' && setOpen(false)}
+    >
       <button
         type="button"
         aria-label={label}
         aria-describedby={open ? id : undefined}
         aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-        onFocus={() => setOpen(true)}
-        onBlur={() => setOpen(false)}
+        onPointerDown={(e) => (pointer.current = e.pointerType)}
+        onClick={() => {
+          // A mouse already opened it by hovering; a tap or Enter toggles it.
+          if (pointer.current === 'mouse') setOpen(true);
+          else setOpen((o) => !o);
+          pointer.current = '';
+        }}
+        onFocus={() => !pointer.current && setOpen(true)}
+        onBlur={() => {
+          pointer.current = '';
+          setOpen(false);
+        }}
         onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
-        className="grid h-5 w-5 place-items-center rounded-full text-muted/80 transition-colors hover:text-ink"
+        className="tap grid h-5 w-5 place-items-center rounded-full text-muted/80 transition-colors hover:text-ink"
       >
         <HelpCircle size={14} />
       </button>
       {open && (
         <span
+          ref={tipRef}
           id={id}
           role="tooltip"
-          className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-60 -translate-x-1/2 rounded-xl border border-line bg-surface px-3 py-2 text-left text-xs font-normal normal-case leading-relaxed tracking-normal text-body shadow-[var(--shadow-pop)] [animation:fade-in_0.12s_ease_both]"
+          style={{ left: place.x }}
+          className={`pointer-events-none absolute z-50 w-60 max-w-[calc(100vw-1rem)] rounded-xl border border-line bg-surface px-3 py-2 text-left text-xs font-normal normal-case leading-relaxed tracking-normal text-body shadow-[var(--shadow-pop)] [animation:fade-in_0.12s_ease_both] ${place.below ? 'top-full mt-2' : 'bottom-full mb-2'}`}
         >
           {text}
         </span>

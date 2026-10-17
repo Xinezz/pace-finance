@@ -24,7 +24,7 @@ const INSIGHT_STYLE: Record<Insight['tone'], string> = {
 };
 
 export function DashboardPage() {
-  const { data, today } = useStore();
+  const { data, today, storeKind } = useStore();
   const { fmt } = useMoney();
   const { month, navigate, openAddTx } = useUi();
   const m = useMonthData(month);
@@ -73,7 +73,7 @@ export function DashboardPage() {
               </div>
             }
           >
-            Add what you’ve spent or earned and this page fills in with totals, charts and gentle insights. Nothing is shared. It all stays on this device.
+            Add what you’ve spent or earned and this page fills in with totals, charts and gentle insights. {storeKind === 'cloud' ? 'It’s saved to your own account, which only you can read.' : 'Nothing is shared. It all stays on this device.'}
           </EmptyState>
         </Card>
       </div>
@@ -151,7 +151,7 @@ export function DashboardPage() {
 
       <NeedsAttention hideWhenEmpty />
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2" aria-labelledby="where-title">
           <CardHeader
             id="where-title"
@@ -206,7 +206,7 @@ export function DashboardPage() {
                   <p className="text-sm leading-snug text-body">
                     {i.text}
                     {i.link && (
-                      <button type="button" className="ml-1.5 font-medium text-sage-deep hover:underline" onClick={() => navigate(i.link!.to)}>
+                      <button type="button" className="tap ml-1.5 font-medium text-sage-deep hover:underline" onClick={() => navigate(i.link!.to)}>
                         {i.link.label} →
                       </button>
                     )}
@@ -218,7 +218,7 @@ export function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3" aria-labelledby="flow-title">
           <CardHeader id="flow-title" title="Income vs expenses" subtitle="The last six months" />
           {buckets.every((b) => b.income === 0 && b.expenses === 0) ? <EmptyState compact title="Nothing to chart yet">Record a few transactions across a couple of months and this fills in.</EmptyState> : <IncomeExpenseChart buckets={buckets} height={260} />}

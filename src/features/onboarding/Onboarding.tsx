@@ -74,7 +74,7 @@ export function Onboarding() {
             <Logo size={32} />
             <span className="font-serif text-2xl text-ink">Pace</span>
           </div>
-          <button type="button" className="text-sm text-muted underline-offset-2 hover:text-ink hover:underline" onClick={() => finish(true)}>
+          <button type="button" className="tap text-sm text-muted underline-offset-2 hover:text-ink hover:underline" onClick={() => finish(true)}>
             Skip setup
           </button>
         </div>

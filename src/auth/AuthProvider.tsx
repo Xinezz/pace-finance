@@ -18,6 +18,9 @@ export type AuthStatus =
 interface AuthApi {
   status: AuthStatus;
   user: CloudUser | null;
+  /** Something to tell the person on the sign-in screen, e.g. why an email link didn't work. */
+  notice: string | null;
+  dismissNotice: () => void;
   cloud: CloudApi | null;
   /**
    * Identifies whose data is on screen. When it changes (sign in, sign out, switching accounts) the whole
@@ -69,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CloudUser | null>(null);
   const [recovery, setRecovery] = useState(false);
   const [guest, setGuest] = useState(readGuest);
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -93,6 +97,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser((prev) => (prev && next && prev.id === next.id && prev.email === next.email ? prev : next));
           }
         });
+        // Opened from a confirmation or password-reset email? Finish that first.
+        const link = await c.completeEmailLink();
+        if (!alive) return;
+        if (link.kind === 'recovery') setRecovery(true);
+        else if (link.kind === 'error') {
+          // Following an email link means they want their account, so show the sign-in screen with the reason
+          // even if this browser was in "without an account" mode. (That mode is one tap away again.)
+          setNotice(link.message);
+          writeGuest(false);
+          setGuest(false);
+        }
         const existing = await c.getUser();
         if (!alive) return;
         setUser((prev) => prev ?? existing);
@@ -177,6 +192,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setGuest(false);
   }, []);
 
+  const dismissNotice = useCallback(() => setNotice(null), []);
+
   const value = useMemo<AuthApi>(() => {
     let status: AuthStatus;
     if (cloud === undefined) status = 'loading';
@@ -188,6 +205,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {
       status,
       user,
+      notice,
+      dismissNotice,
       cloud: cloud ?? null,
       scope: status === 'signed-in' || status === 'recovery' ? `user:${user?.id}` : 'local',
       signIn,
@@ -199,7 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       continueAsGuest,
       leaveGuestMode,
     };
-  }, [cloud, user, recovery, guest, signIn, signUp, signOut, requestPasswordReset, updatePassword, deleteAccount, continueAsGuest, leaveGuestMode]);
+  }, [cloud, user, recovery, guest, notice, dismissNotice, signIn, signUp, signOut, requestPasswordReset, updatePassword, deleteAccount, continueAsGuest, leaveGuestMode]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

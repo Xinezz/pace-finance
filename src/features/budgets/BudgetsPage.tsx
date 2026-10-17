@@ -70,9 +70,9 @@ function BudgetModal({ category, onClose }: { category?: Category; onClose: () =
           <MoneyInput value={amount} onChange={(v) => { setAmount(v); setError(null); }} currency={currency} data-autofocus />
         </Field>
         {suggestion !== undefined && suggestion > 0 && (
-          <button type="button" className="flex items-center justify-between rounded-xl bg-sage-soft px-3 py-2.5 text-left text-sm text-sage-deep transition-colors hover:bg-sage/30" onClick={() => setAmount(minorToInput(tidy(suggestion, currency), currency))}>
-            <span>You usually spend about <strong>{fmt(suggestion, { trimWhole: true })}</strong> a month here.</span>
-            <span className="font-semibold">Use {fmt(tidy(suggestion, currency), { trimWhole: true })}</span>
+          <button type="button" className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl bg-sage-soft px-3 py-2.5 text-left text-sm text-sage-deep transition-colors hover:bg-sage/30" onClick={() => setAmount(minorToInput(tidy(suggestion, currency), currency))}>
+            <span className="min-w-0 flex-[1_1_12rem]">You usually spend about <strong>{fmt(suggestion, { trimWhole: true })}</strong> a month here.</span>
+            <span className="shrink-0 whitespace-nowrap font-semibold">Use {fmt(tidy(suggestion, currency), { trimWhole: true })}</span>
           </button>
         )}
         <div className="flex justify-between gap-2">
@@ -149,7 +149,7 @@ export function BudgetsPage() {
 
           <Card aria-labelledby="overall-title">
             <CardHeader id="overall-title" title="Overall" subtitle="Across the categories you’ve set a budget for" action={ui && <Badge tone={ui.badge}><ui.icon size={12} /> {ui.label}</Badge>} />
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               <div className="md:col-span-2">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <span className="font-serif text-4xl tabular-nums text-ink">{fmt(overall.spent)}</span>
@@ -186,7 +186,7 @@ export function BudgetsPage() {
             </div>
           </Card>
 
-          <section aria-label="Category budgets" className="grid gap-4 md:grid-cols-2">
+          <section aria-label="Category budgets" className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {rows.map((r) => {
               const c = catMap.get(r.categoryId);
               if (!c || r.state === 'none') return null;

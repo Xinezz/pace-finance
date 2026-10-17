@@ -134,7 +134,7 @@ interface SegmentedProps<T extends string> {
 
 export function Segmented<T extends string>({ value, onChange, options, ariaLabel, size = 'md', className = '' }: SegmentedProps<T>) {
   return (
-    <div role="group" aria-label={ariaLabel} className={`inline-flex rounded-xl bg-surface2 p-1 ${className}`}>
+    <div role="group" aria-label={ariaLabel} className={`relative inline-flex max-w-full overflow-x-auto rounded-xl bg-surface2 p-1 ${className}`}>
       {options.map((o) => (
         <button
           key={o.value}
@@ -142,7 +142,7 @@ export function Segmented<T extends string>({ value, onChange, options, ariaLabe
           aria-pressed={value === o.value}
           aria-label={o.ariaLabel}
           onClick={() => onChange(o.value)}
-          className={`rounded-lg font-medium transition-all ${size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-3.5 py-1.5 text-[13px]'} ${value === o.value ? 'bg-surface text-ink shadow-sm' : 'text-muted hover:text-ink'}`}
+          className={`shrink-0 whitespace-nowrap rounded-lg font-medium transition-all ${size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-3.5 py-1.5 text-[13px]'} ${value === o.value ? 'bg-surface text-ink shadow-sm' : 'text-muted hover:text-ink'}`}
         >
           {o.label}
         </button>
@@ -185,7 +185,7 @@ export function TagInput({ value, onChange, suggestions = [], id }: TagInputProp
         <span key={t} className="inline-flex items-center gap-1 rounded-full bg-sage-soft py-0.5 pl-2 pr-1 text-xs text-sage-deep">
           <Hash size={11} aria-hidden />
           {t}
-          <button type="button" aria-label={`Remove tag ${t}`} className="grid h-4 w-4 place-items-center rounded-full hover:bg-sage/30" onClick={() => onChange(value.filter((x) => x !== t))}>
+          <button type="button" aria-label={`Remove tag ${t}`} className="tap grid h-4 w-4 place-items-center rounded-full hover:bg-sage/30" onClick={() => onChange(value.filter((x) => x !== t))}>
             <X size={10} />
           </button>
         </span>

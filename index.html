@@ -2,17 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- resizes-content: on Android the on-screen keyboard shrinks the page, so forms in sheets stay above it. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="description" content="Pace - a calm, local-first personal finance and savings tracker." />
     <meta name="theme-color" content="#F8F6F0" />
+    <!-- Add to Home Screen: opens full screen like an app, with its own icon and name. -->
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Pace" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- Don't turn amounts like 4200.00 into tappable phone numbers. -->
+    <meta name="format-detection" content="telephone=no" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>Pace - your money, your pace</title>
     <script>
       // Apply the saved theme before first paint to avoid a flash. Light is the default.
       try {
         var t = localStorage.getItem('pace:theme');
         var dark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        if (dark) document.documentElement.classList.add('dark');
+        if (dark) {
+          document.documentElement.classList.add('dark');
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#151a16');
+        }
       } catch (e) {}
     </script>
   </head>

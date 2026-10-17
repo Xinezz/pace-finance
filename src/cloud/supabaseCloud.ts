@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js';
+import { linkErrorMessage, OPENED_IN_ANOTHER_BROWSER, readEmailLink, withoutEmailLink, type EmailLinkOutcome } from './emailLink';
 import type { AuthEvent, AuthResult, CloudApi, CloudUser, DocumentGateway, WriteResult } from './types';
 
 const TABLE = 'user_data';
@@ -47,7 +48,12 @@ const toUser = (u: User | null | undefined): CloudUser | null => (u && u.email ?
 /** Where the email links should send people back to: this exact site, without query or hash. */
 const returnUrl = () => `${window.location.origin}${window.location.pathname}`;
 
+const nextTick = () => new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+
 export function createSupabaseCloud(url: string, anonKey: string): CloudApi {
+  // Read what an email link brought before supabase-js tidies the address bar during start-up.
+  const arrivedWith = readEmailLink(window.location.href);
+
   const client: SupabaseClient = createClient(url, anonKey, {
     auth: {
       // PKCE keeps tokens out of the URL, which matters because this app uses #/hash routing.
@@ -57,6 +63,37 @@ export function createSupabaseCloud(url: string, anonKey: string): CloudApi {
       detectSessionInUrl: true,
     },
   });
+
+  // Listen from the very start: a password-reset link is announced while the client is still starting up.
+  let recoveryLink = false;
+  client.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') recoveryLink = true;
+  });
+
+  let linkOutcome: Promise<EmailLinkOutcome> | null = null;
+  async function finishEmailLink(): Promise<EmailLinkOutcome> {
+    if (!arrivedWith) return { kind: 'none' };
+    // Waits for start-up, including exchanging a one-time ?code= from the link if this browser can.
+    const { data } = await client.auth.getSession();
+    let outcome: EmailLinkOutcome;
+    if (arrivedWith.tokenHash && arrivedWith.type) {
+      // token_hash links don't depend on this browser, so they work from any phone or email app.
+      const { error } = await client.auth.verifyOtp({ token_hash: arrivedWith.tokenHash, type: arrivedWith.type });
+      if (error) outcome = { kind: 'error', message: linkErrorMessage(error.code) };
+      else outcome = arrivedWith.type === 'recovery' ? { kind: 'recovery' } : { kind: 'signed-in' };
+    } else if (arrivedWith.errorCode) {
+      outcome = { kind: 'error', message: linkErrorMessage(arrivedWith.errorCode) };
+    } else if (data.session) {
+      // The reset announcement is queued just after start-up; give it a moment to arrive.
+      await nextTick();
+      await nextTick();
+      outcome = recoveryLink ? { kind: 'recovery' } : { kind: 'signed-in' };
+    } else {
+      outcome = { kind: 'error', message: OPENED_IN_ANOTHER_BROWSER };
+    }
+    window.history.replaceState(window.history.state, '', withoutEmailLink(window.location.href));
+    return outcome;
+  }
 
   function gatewayFor(user: CloudUser): DocumentGateway {
     const fetchDoc = async () => {
@@ -100,6 +137,11 @@ export function createSupabaseCloud(url: string, anonKey: string): CloudApi {
     async getUser() {
       const { data } = await client.auth.getSession();
       return toUser(data.session?.user);
+    },
+
+    completeEmailLink() {
+      linkOutcome ??= finishEmailLink();
+      return linkOutcome;
     },
 
     onAuthChange(cb) {

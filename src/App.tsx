@@ -43,7 +43,7 @@ function CelebrationOverlay() {
               <strong className="font-semibold text-body">{celebration.goalName}</strong> {copy.text}
             </p>
           </div>
-          <button type="button" className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold text-sage-deep hover:underline" onClick={clearCelebration}>
+          <button type="button" className="tap shrink-0 rounded-lg px-2 py-1 text-xs font-semibold text-sage-deep hover:underline" onClick={clearCelebration}>
             Close
           </button>
         </div>

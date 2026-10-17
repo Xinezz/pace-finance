@@ -19,7 +19,7 @@ const PREVIEW_ROWS = 200;
 type Step = 'file' | 'map' | 'preview' | 'done';
 
 export function ImportWizard({ onClose }: { onClose: () => void }) {
-  const { data, dispatch, undo } = useStore();
+  const { data, dispatch, undo, storeKind } = useStore();
   const { fmt } = useMoney();
   const { toast } = useFeedback();
   const { openCategorize } = useUi();
@@ -118,7 +118,7 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
   const sample = body.slice(0, 3);
 
   return (
-    <Modal title="Import transactions" description="Bring in a CSV from your bank or a spreadsheet. Nothing leaves your device." onClose={onClose} width="58rem">
+    <Modal title="Import transactions" description={storeKind === 'cloud' ? 'Bring in a CSV from your bank or a spreadsheet. The file is read on your device; only the transactions you import are saved to your account.' : 'Bring in a CSV from your bank or a spreadsheet. Nothing leaves your device.'} onClose={onClose} width="58rem">
       <div className="flex flex-col gap-5">
         <ol className="flex items-center gap-2 text-xs" aria-label="Import steps">
           {(['file', 'map', 'preview', 'done'] as Step[]).map((s, i) => {
@@ -164,7 +164,7 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
           <div className="flex flex-col gap-5">
             <p className="flex items-center gap-2 text-sm text-muted"><FileSpreadsheet size={16} className="text-sage-deep" /> <strong className="text-ink">{fileName}</strong> · {body.length} rows found</p>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={hasHeader} onChange={(e) => { setHasHeader(e.target.checked); setMapping(guessMapping(e.target.checked ? table[0].map((h) => h.trim()) : [])); }} className="h-4 w-4 accent-[var(--c-sage-deep)]" /> The first row has column names</label>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {IMPORT_FIELDS.map((f) => (
                 <Field key={f.field} label={f.label} required={f.required} hint={f.hint}>
                   <Select value={mapping[f.field] === undefined ? '' : String(mapping[f.field])} onChange={(e) => setCol(f.field, e.target.value)}>
@@ -176,7 +176,7 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
                 </Field>
               ))}
             </div>
-            <div className="grid gap-4 border-t border-line pt-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 border-t border-line pt-4 sm:grid-cols-2">
               <Field label="Date format" required hint="Matters for dates like 05/10/2026.">
                 <Select value={dateFormat} onChange={(e) => setDateFormat(e.target.value as DateFormat)}>
                   <option value="dmy">Day / Month / Year</option>
@@ -199,7 +199,7 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
               )}
             </div>
             {sample.length > 0 && (
-              <div className="overflow-x-auto rounded-2xl border border-line">
+              <div className="scroll-x relative overflow-x-auto rounded-2xl border border-line">
                 <table className="w-full text-left text-xs">
                   <caption className="sr-only">First rows of your file</caption>
                   <thead className="bg-surface2 text-muted"><tr>{headers.map((h, i) => <th key={i} scope="col" className="whitespace-nowrap px-3 py-2 font-medium">{h}</th>)}</tr></thead>

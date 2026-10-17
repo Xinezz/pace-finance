@@ -30,7 +30,7 @@ function Delta({ pct, goodWhen }: { pct: number | null; goodWhen: 'up' | 'down' 
 
 function Table({ caption, head, children, foot }: { caption: string; head: { label: string; right?: boolean }[]; children: ReactNode; foot?: ReactNode }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="scroll-x relative overflow-x-auto">
       <table className="w-full min-w-[32rem] text-left text-sm">
         <caption className="sr-only">{caption}</caption>
         <thead className="text-xs text-muted">
@@ -137,7 +137,7 @@ export function ReportsPage() {
                 </dl>
                 {m.uncategorized > 0 && <p className="mt-4 text-sm text-peach-deep">{m.uncategorized} transaction{m.uncategorized === 1 ? '' : 's'} this month still need a category, so category figures may be incomplete.</p>}
               </Card>
-              <div className="grid gap-6 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <Card className="lg:col-span-2" aria-labelledby="mr-cat">
                   <CardHeader id="mr-cat" title="Spending by category" />
                   {m.categories.length === 0 ? <p className="text-sm text-muted">No spending this month.</p> : (

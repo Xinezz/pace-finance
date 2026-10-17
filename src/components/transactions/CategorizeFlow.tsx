@@ -169,13 +169,13 @@ export function CategorizeFlow({ ids, onClose }: Props) {
 
         {!showAll ? (
           <div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3">
               {ranked.slice(0, 9).map((c, i) => (
-                <button key={c.id} type="button" onClick={() => choose(c.id)} className="group relative flex items-center gap-2.5 rounded-2xl border border-line bg-surface px-3 py-3 text-left text-sm transition-all hover:-translate-y-0.5 hover:border-sage-deep hover:shadow-[var(--shadow-card)]">
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-lg" style={{ background: `color-mix(in srgb, ${c.color} 30%, transparent)` }} aria-hidden>
+                <button key={c.id} type="button" onClick={() => choose(c.id)} className="group relative flex items-center gap-2 rounded-2xl border border-line bg-surface px-2.5 py-3 text-left text-sm transition-all sm:gap-2.5 sm:px-3 hover:-translate-y-0.5 hover:border-sage-deep hover:shadow-[var(--shadow-card)]">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl text-base sm:h-9 sm:w-9 sm:text-lg" style={{ background: `color-mix(in srgb, ${c.color} 30%, transparent)` }} aria-hidden>
                     {c.icon}
                   </span>
-                  <span className="min-w-0 flex-1 truncate font-medium text-ink">{c.name}</span>
+                  <span className="min-w-0 flex-1 font-medium leading-tight text-ink hyphens-auto line-clamp-2">{c.name}</span>
                   <kbd className="absolute right-2 top-1.5 hidden rounded bg-surface2 px-1.5 text-[10px] font-semibold text-muted sm:block" aria-hidden>
                     {i + 1}
                   </kbd>

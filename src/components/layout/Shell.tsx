@@ -123,7 +123,7 @@ function MobileNav() {
   );
 
   return (
-    <nav aria-label="Main" className="no-print fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 px-2 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 backdrop-blur lg:hidden">
+    <nav aria-label="Main" className="mobile-nav no-print fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 pb-[max(0.35rem,env(safe-area-inset-bottom))] pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] pt-1.5 backdrop-blur lg:hidden">
       <div className="mx-auto flex max-w-lg items-end">
         {primary.slice(0, 2).map(link)}
         <div className="flex flex-1 justify-center">
@@ -208,8 +208,8 @@ function TopBar() {
   const { data } = useStore();
   const showMonth = ['dashboard', 'transactions', 'analytics', 'budgets', 'calendar', 'savings', 'reports'].includes(route.page);
   return (
-    <header className="no-print sticky top-0 z-30 border-b border-line/70 bg-bg/85 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6 lg:px-8">
+    <header className="no-print sticky top-0 z-30 border-b border-line/70 bg-bg/85 pt-[env(safe-area-inset-top)] backdrop-blur-md">
+      <div className="page-x mx-auto flex h-16 max-w-6xl items-center gap-3">
         <div className="flex items-center gap-2 lg:hidden">
           <Logo size={30} />
         </div>
@@ -236,7 +236,7 @@ function PageFallback() {
   return (
     <div className="flex flex-col gap-4" role="status" aria-label="Loading page">
       <Skeleton className="h-10 w-64" />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[0, 1, 2, 3].map((i) => (
           <Skeleton key={i} className="h-32" />
         ))}
@@ -274,7 +274,7 @@ export function Shell(): ReactNode {
       <Sidebar />
       <div className="min-w-0 flex-1">
         <TopBar />
-        <main id="main" tabIndex={-1} className="print-full mx-auto max-w-6xl px-4 pb-32 pt-6 outline-none sm:px-6 lg:px-8 lg:pb-16">
+        <main id="main" tabIndex={-1} className="print-full page-x mx-auto max-w-6xl pb-[calc(8rem+env(safe-area-inset-bottom))] pt-6 outline-none lg:pb-16">
           {storeNotice && (
             <div role="status" className="mb-6 flex items-start gap-3 rounded-2xl border border-peach/60 bg-peach-soft px-4 py-3 text-sm text-peach-deep">
               <AlertTriangle size={18} className="mt-0.5 shrink-0" />

@@ -38,7 +38,7 @@ export function NotificationBell() {
           <div className="mb-1 flex items-center justify-between px-2 py-1">
             <h2 className="font-serif text-lg text-ink">Notifications</h2>
             {hasDismissed && (
-              <button type="button" className="text-xs font-medium text-sage-deep hover:underline" onClick={() => dispatch({ type: 'resetNotices' })}>
+              <button type="button" className="tap text-xs font-medium text-sage-deep hover:underline" onClick={() => dispatch({ type: 'resetNotices' })}>
                 Show dismissed
               </button>
             )}

@@ -53,6 +53,14 @@ It is safe to run more than once.
   members of your Supabase team** and only about **2 emails per hour**. For a personal app that's fine: sign up in
   Pace with **the same email address you use for Supabase**. To let other people sign up, configure custom SMTP
   (Authentication → Emails → SMTP; providers such as Resend, Postmark or Brevo work).
+- **Email links that work on any device (recommended if you use a phone):** by default a confirmation or
+  password-reset link only works in the same browser that asked for it. Tapping it in a phone's email app (which
+  often opens its own built-in browser) then fails, and Pace explains why. To make links work anywhere, open
+  **Authentication → Emails** and in these two templates replace `{{ .ConfirmationURL }}` with:
+  - **Confirm signup:** `{{ .SiteURL }}?token_hash={{ .TokenHash }}&type=email`
+  - **Reset password:** `{{ .SiteURL }}?token_hash={{ .TokenHash }}&type=recovery`
+
+  The links then lead to your **Site URL**, so set that to the live site's address.
 - **Make it only yours (recommended for a personal app):** after creating your own account, switch off
   **Allow new users to sign up** (Sign In / Providers). Nobody else can create an account; you keep signing in as normal.
 - Turn on **leaked password protection** if your plan offers it.
