@@ -1,4 +1,8 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
+import { AuthProvider, useAuth } from './auth/AuthProvider';
+import { AuthScreen, RecoveryScreen } from './auth/AuthScreen';
+import { AccountDialogs } from './components/account/AccountDialogs';
+import { CloudDataStore } from './cloud/cloudStore';
 import { Confetti } from './components/ui/Feedback';
 import { Button } from './components/ui/Button';
 import { Shell } from './components/layout/Shell';
@@ -6,7 +10,7 @@ import { Logo } from './components/layout/nav';
 import { Onboarding } from './features/onboarding/Onboarding';
 import { Welcome } from './features/onboarding/Welcome';
 import { FeedbackProvider } from './state/feedback';
-import { StoreProvider, useStore } from './state/store';
+import { StoreProvider, useStore, type StoreLoader } from './state/store';
 import { UiProvider, useUi } from './state/ui';
 
 const MILESTONE_COPY: Record<number, { title: string; text: string }> = {
@@ -65,14 +69,26 @@ function Gate() {
   const { ready, loadError, data } = useStore();
   const { route } = useUi();
 
+  const auth = useAuth();
+
   if (loadError) {
+    const signedIn = auth.status === 'signed-in';
     return (
       <Splash>
         <h1 className="font-serif text-2xl text-ink">We couldn’t open your saved data</h1>
-        <p className="max-w-sm text-sm text-muted">{loadError} Your browser may be blocking local storage for this page.</p>
-        <Button variant="primary" onClick={() => window.location.reload()}>
-          Try again
-        </Button>
+        <p className="max-w-sm text-sm text-muted">
+          {signedIn ? 'We couldn’t reach your account. Check your connection, or sign out and back in if your session has expired.' : `${loadError} Your browser may be blocking local storage for this page.`}
+        </p>
+        <div className="flex flex-wrap justify-center gap-2">
+          <Button variant="primary" onClick={() => window.location.reload()}>
+            Try again
+          </Button>
+          {signedIn && (
+            <Button onClick={() => void auth.signOut()}>
+              Sign out
+            </Button>
+          )}
+        </div>
       </Splash>
     );
   }
@@ -90,15 +106,53 @@ function Gate() {
   return <Shell />;
 }
 
-export function App() {
+/** Everything that needs the person's data. Rebuilt from scratch (see `key`) whenever the account changes. */
+function Workspace() {
+  const auth = useAuth();
+  const { cloud } = auth;
+  const cloudUser = auth.status === 'signed-in' ? auth.user : null;
+  const userId = cloudUser?.id;
+
+  // A signed-in person's data lives in their cloud account; a guest's (or an unconfigured build's) stays on this device.
+  const loader = useMemo<StoreLoader | undefined>(
+    () => (cloud && cloudUser ? async () => ({ store: new CloudDataStore(cloud.gatewayFor(cloudUser)) }) : undefined),
+    // cloudUser is intentionally keyed by id: a refreshed token must not rebuild the store.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cloud, userId],
+  );
+
   return (
-    <StoreProvider>
+    <StoreProvider loader={loader} offerLocalImport={!!cloudUser}>
       <FeedbackProvider>
         <UiProvider>
           <Gate />
+          {/* On every screen, including welcome and onboarding, where a new account first lands. */}
+          <AccountDialogs />
           <CelebrationOverlay />
         </UiProvider>
       </FeedbackProvider>
     </StoreProvider>
+  );
+}
+
+function AuthGate() {
+  const auth = useAuth();
+  if (auth.status === 'loading') {
+    return (
+      <Splash>
+        <p className="text-sm text-muted" role="status">Opening your finances…</p>
+      </Splash>
+    );
+  }
+  if (auth.status === 'signed-out') return <AuthScreen />;
+  if (auth.status === 'recovery') return <RecoveryScreen />;
+  return <Workspace key={auth.scope} />;
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <AuthGate />
+    </AuthProvider>
   );
 }

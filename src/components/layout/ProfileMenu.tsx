@@ -1,5 +1,6 @@
-import { Download, Monitor, Moon, Settings, Sun } from 'lucide-react';
+import { Download, LogIn, LogOut, Monitor, Moon, Settings, Sun } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { useAuth } from '../../auth/AuthProvider';
 import { useExportBackup } from '../../hooks/useBackup';
 import { useStore } from '../../state/store';
 import { useUi } from '../../state/ui';
@@ -10,6 +11,7 @@ import { Popover } from '../ui/Popover';
 export function ProfileMenu() {
   const { data, dispatch } = useStore();
   const { navigate } = useUi();
+  const auth = useAuth();
   const exportBackup = useExportBackup();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLButtonElement>(null);
@@ -35,7 +37,9 @@ export function ProfileMenu() {
         <div className="p-1">
           <div className="px-3 pb-3 pt-2">
             <p className="font-serif text-lg text-ink">{name || 'Welcome'}</p>
-            <p className="text-xs text-muted">{data.meta.mode === 'demo' ? 'Exploring demo data' : 'Your data stays on this device'}</p>
+            <p className="truncate text-xs text-muted">
+              {auth.status === 'signed-in' ? auth.user?.email : data.meta.mode === 'demo' ? 'Exploring demo data' : 'Your data stays on this device'}
+            </p>
           </div>
           <div className="px-3 pb-3">
             <Segmented<ThemeSetting>
@@ -57,6 +61,16 @@ export function ProfileMenu() {
           <button className={item} onClick={() => { setOpen(false); exportBackup(); }}>
             <Download size={16} className="text-muted" /> Download a backup
           </button>
+          {auth.status === 'signed-in' && (
+            <button className={item} onClick={() => { setOpen(false); void auth.signOut(); }}>
+              <LogOut size={16} className="text-muted" /> Sign out
+            </button>
+          )}
+          {auth.status === 'guest' && (
+            <button className={item} onClick={() => { setOpen(false); auth.leaveGuestMode(); }}>
+              <LogIn size={16} className="text-muted" /> Sign in or create an account
+            </button>
+          )}
         </div>
       </Popover>
     </>

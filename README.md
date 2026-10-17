@@ -116,3 +116,13 @@ persistence (against `fake-indexeddb`), and backup/restore validation.
   of month in three or more months) and used for projections and the calendar.
 - The end-of-month projection is a rough estimate and says so.
 - There is no sign-in. A real multi-user version needs a backend and authentication, which is intentionally not included.
+
+## Accounts and cloud sync (optional)
+
+Out of the box Pace is local-only. To add sign-in and sync across devices, connect a free Supabase project: see
+[`supabase/SETUP.md`](supabase/SETUP.md). Each person's data then lives in their own private row, enforced by
+Row Level Security in the database, with email + password sign-in, password reset, change password and
+account deletion. If another device saved first, Pace asks which copy to keep instead of overwriting.
+
+`npm run dev:mock` lets you try every sign-in screen with a pretend backend (development only, not secure).
+Real keys go in `.env.local`, which is git-ignored. Use the publishable key (`sb_publishable_…`); never a secret key, which Pace refuses to run with.

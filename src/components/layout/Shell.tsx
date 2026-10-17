@@ -34,23 +34,30 @@ function SaveIndicator() {
       </span>
     );
   }
+  if (saveState === 'conflict') {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-peach-deep" role="alert">
+        <AlertTriangle size={13} /> Changed elsewhere
+      </span>
+    );
+  }
   if (saveState === 'saving') {
     return (
       <span className="inline-flex items-center gap-1.5 text-xs text-muted" role="status">
-        <Loader2 size={13} className="animate-spin" /> Saving…
+        <Loader2 size={13} className="animate-spin" /> {storeKind === 'cloud' ? 'Syncing…' : 'Saving…'}
       </span>
     );
   }
   if (saveState === 'error') {
     return (
       <span className="inline-flex items-center gap-1.5 text-xs font-medium text-peach-deep" role="alert">
-        <AlertTriangle size={13} /> Couldn’t save
+        <AlertTriangle size={13} /> {storeKind === 'cloud' ? 'Couldn’t sync. Retrying…' : 'Couldn’t save'}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center gap-1.5 text-xs text-muted" role="status">
-      <CheckCircle2 size={13} className="text-sage-deep" /> Saved on this device
+      <CheckCircle2 size={13} className="text-sage-deep" /> {storeKind === 'cloud' ? 'Synced to your account' : 'Saved on this device'}
     </span>
   );
 }

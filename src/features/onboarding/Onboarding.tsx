@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { useState } from 'react';
+import { AccountStrip } from '../../components/account/AccountStrip';
 import { Logo } from '../../components/layout/nav';
 import { CategoryIcon } from '../../components/category/CategoryChip';
 import { Button } from '../../components/ui/Button';
@@ -66,6 +67,7 @@ export function Onboarding() {
         <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-blue/25 blur-3xl" />
         <div className="absolute -bottom-32 -left-16 h-96 w-96 rounded-full bg-sage/25 blur-3xl" />
       </div>
+      <AccountStrip />
       <main className="page-enter w-full max-w-lg">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
