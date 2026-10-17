@@ -29,6 +29,9 @@ function friendly(err: ProviderError, fallback: string): string {
       return 'New accounts can’t be created on this site right now.';
     case 'user_banned':
       return 'This account has been disabled.';
+    case 'email_address_not_authorized':
+      // Supabase's built-in email only reaches the project's own team until custom SMTP is set up.
+      return 'This site can’t send email to that address yet. Use the email address of the Supabase account that owns this project (see supabase/SETUP.md).';
     case 'session_expired':
     case 'session_not_found':
     case 'refresh_token_not_found':
