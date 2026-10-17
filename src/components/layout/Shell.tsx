@@ -9,6 +9,7 @@ import { TransactionModal } from '../transactions/TransactionModal';
 import { Button } from '../ui/Button';
 import { Skeleton } from '../ui/Feedback';
 import { Popover } from '../ui/Popover';
+import { ThemeToggle } from '../ui/ThemeToggle';
 import { MonthSelector } from './MonthSelector';
 import { NotificationBell } from './NotificationBell';
 import { ProfileMenu } from './ProfileMenu';
@@ -210,15 +211,17 @@ function TopBar() {
   return (
     <header className="no-print sticky top-0 z-30 border-b border-line/70 bg-bg/85 pt-[env(safe-area-inset-top)] backdrop-blur-md">
       <div className="page-x mx-auto flex h-16 max-w-6xl items-center gap-3">
-        <div className="flex items-center gap-2 lg:hidden">
+        {/* Hidden on the narrowest phones so the month switcher and buttons fit; the tab bar is still there. */}
+        <div className="hidden items-center gap-2 min-[360px]:flex lg:hidden">
           <Logo size={30} />
         </div>
         <div className="min-w-0 flex-1">{showMonth && <MonthSelector />}</div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <span className="hidden md:block">
             <SaveIndicator />
           </span>
           {data.meta.mode === 'demo' && <span className="hidden rounded-full bg-butter-soft px-2.5 py-1 text-[11px] font-semibold text-butter-deep sm:inline">Demo</span>}
+          <ThemeToggle />
           <NotificationBell />
           <span className="hidden sm:block">
             <Button variant="primary" onClick={() => openAddTx()} icon={<Plus size={17} />} aria-keyshortcuts="N">

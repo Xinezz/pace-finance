@@ -120,6 +120,7 @@ export type ThemeSetting = 'light' | 'dark' | 'system';
 export interface Settings {
   userName: string;
   currency: string;
+  /** No longer used for display: the theme is now a per-device choice (see state/theme.tsx). Kept for older saved data. */
   theme: ThemeSetting;
   weekStartsOn: 0 | 1;
   /** Optional monthly savings target, minor units. 0 = not set. */

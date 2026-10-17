@@ -11,6 +11,7 @@ import { Onboarding } from './features/onboarding/Onboarding';
 import { Welcome } from './features/onboarding/Welcome';
 import { FeedbackProvider } from './state/feedback';
 import { StoreProvider, useStore, type StoreLoader } from './state/store';
+import { ThemeProvider } from './state/theme';
 import { UiProvider, useUi } from './state/ui';
 
 const MILESTONE_COPY: Record<number, { title: string; text: string }> = {
@@ -151,8 +152,10 @@ function AuthGate() {
 
 export function App() {
   return (
-    <AuthProvider>
-      <AuthGate />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AuthGate />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

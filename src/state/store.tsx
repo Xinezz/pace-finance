@@ -193,26 +193,6 @@ export function StoreProvider({ children, loader, offerLocalImport }: StoreProvi
     };
   }, [flush]);
 
-  /* ---------- theme ---------- */
-  const theme = data.settings.theme;
-  useEffect(() => {
-    const apply = () => {
-      const dark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      document.documentElement.classList.toggle('dark', dark);
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#151a16' : '#F8F6F0');
-    };
-    apply();
-    try {
-      localStorage.setItem('pace:theme', theme);
-    } catch {
-      /* storage may be blocked; theme still works for this session */
-    }
-    if (theme !== 'system') return;
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    mq.addEventListener('change', apply);
-    return () => mq.removeEventListener('change', apply);
-  }, [theme]);
-
   /* ---------- dispatch ---------- */
   const dispatch = useCallback((action: Action, opts?: DispatchOptions) => {
     const prev = dataRef.current;
