@@ -59,10 +59,21 @@ It is safe to run more than once.
 
 ## 5. Deploying
 
-Any static host works (Netlify, Vercel, Cloudflare Pages; GitHub Pages needs a paid plan for private repos).
-Build with `npm run build` and serve `dist/`. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the
-host's environment settings (they are baked in at build time), add the site's address to the Redirect URLs, and
-serve it over **HTTPS**. Pace uses `#/` routes, so no rewrite rules are needed.
+**GitHub Pages (set up in this repo):** `.github/workflows/deploy.yml` builds and publishes the site on every push to
+`main`, at `https://<owner>.github.io/<repo>/`. It needs, once:
+
+1. **Settings → Pages → Source: GitHub Actions** (free for public repos; private repos need a paid plan).
+2. **Settings → Secrets and variables → Actions → Variables:** add `VITE_SUPABASE_URL` and
+   `VITE_SUPABASE_PUBLISHABLE_KEY` (the same values as `.env.local`). Leave them out for a local-only site.
+3. In Supabase, add the site's address (with the trailing `/`) to **Redirect URLs**, and make it the **Site URL** if
+   you want email links to open the live site rather than `localhost`.
+
+**Any other static host** (Netlify, Vercel, Cloudflare Pages): build with `npm run build` and serve `dist/`. Set the
+same two variables in the host's environment settings (they are baked in at build time), add the site's address to
+the Redirect URLs, and serve it over **HTTPS**. Pace uses `#/` routes, so no rewrite rules are needed. If the site
+lives in a sub-folder, build with `BASE_PATH=/folder/`.
+
+Every build refuses to run if the key is a secret key, because everything `VITE_*` is shipped to visitors.
 
 ## Trying the screens without Supabase
 

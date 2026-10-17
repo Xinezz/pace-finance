@@ -1,8 +1,10 @@
 # Pace — your money, your pace
 
 A calm, local-first personal finance and savings tracker. Track income, expenses and savings goals, sort every
-transaction the way *you* want, and see exactly where your money goes. No bank connections, no accounts, no server:
-everything lives in your browser.
+transaction the way *you* want, and see exactly where your money goes. No bank connections: everything lives in your
+browser, unless you turn on the optional sign-in to sync between devices.
+
+**Try it:** <https://xinezz.github.io/pace-finance/>
 
 ## Run it
 
@@ -89,8 +91,8 @@ src/
 
 Key decisions:
 
-- **Local-first behind an interface.** The UI only talks to `DataStore`. Moving to a real database with sign-in means
-  writing one new class (plus an API); no component changes.
+- **Local-first behind an interface.** The UI only talks to `DataStore`. Cloud sync is one more implementation
+  (`CloudDataStore`); no component changes.
 - **A pure reducer** holds every state rule (what a deleted category does, how currency changes rescale amounts…), so
   they are unit-tested without a browser.
 - **Derived, not stored.** Totals, percentages, insights, notifications and projections are always computed from the
@@ -115,7 +117,7 @@ persistence (against `fake-indexeddb`), and backup/restore validation.
 - Bills aren't auto-posted. Recurring charges are *detected* from history (same description, similar amount, steady day
   of month in three or more months) and used for projections and the calendar.
 - The end-of-month projection is a rough estimate and says so.
-- There is no sign-in. A real multi-user version needs a backend and authentication, which is intentionally not included.
+- Sign-in is optional and needs your own Supabase project (see below). Without it, data stays in one browser.
 
 ## Accounts and cloud sync (optional)
 
