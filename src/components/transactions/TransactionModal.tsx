@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowRightLeft, ArrowUpRight, Sparkles, Trash2, Zap } from 'lucide-react';
+import { ArrowDownLeft, ArrowRightLeft, ArrowUpRight, ChevronDown, Sparkles, Trash2, Zap } from 'lucide-react';
 import { useMemo, useRef, useState, type FormEvent } from 'react';
 import { distinctTags } from '../../domain/calc';
 import { suggestCategory } from '../../domain/categorize';
@@ -53,7 +53,10 @@ export function TransactionModal({ state, onClose }: Props) {
   const [saveAsQuick, setSaveAsQuick] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  // Rarely needed extras stay folded away so the form is short on a phone; open when editing one that uses them.
+  const [moreOpen, setMoreOpen] = useState(!!(seed?.refund || seed?.tags?.length || seed?.notes));
   const descRef = useRef<HTMLInputElement>(null);
+  const amountRef = useRef<HTMLInputElement>(null);
 
   const tagSuggestions = useMemo(() => distinctTags(data.transactions), [data.transactions]);
 
@@ -193,9 +196,32 @@ export function TransactionModal({ state, onClose }: Props) {
         : 'Suggested from the description. Change it any time.'
       : null;
 
+  // Phones: two equal buttons (Cancel is the ✕ at the top). Wider screens: Delete on the left, the rest on the right.
+  const footer = (
+    <div className="flex items-center gap-2">
+      {existing && (
+        <Button variant="danger" onClick={remove} icon={<Trash2 size={15} />}>
+          Delete
+        </Button>
+      )}
+      <span className="ml-auto hidden sm:block">
+        <Button variant="ghost" onClick={onClose}>Cancel</Button>
+      </span>
+      {!existing && (
+        <Button variant="soft" onClick={() => submit(true)()} disabled={busy} className="flex-1 sm:flex-none">
+          <span className="sm:hidden">Save & new</span>
+          <span className="hidden sm:inline">Save & add another</span>
+        </Button>
+      )}
+      <Button type="submit" form="tx-form" variant="primary" loading={busy} className="flex-1 sm:flex-none">
+        {existing ? 'Save changes' : 'Add transaction'}
+      </Button>
+    </div>
+  );
+
   return (
-    <Modal title={existing ? 'Edit transaction' : 'Add a transaction'} onClose={onClose} width="36rem">
-      <form onSubmit={submit(false)} noValidate className="flex flex-col gap-5">
+    <Modal title={existing ? 'Edit transaction' : 'Add a transaction'} onClose={onClose} width="36rem" footer={footer} fullScreenOnPhone>
+      <form id="tx-form" onSubmit={submit(false)} noValidate className="flex flex-col gap-5">
         {!existing && data.quickActions.length > 0 && (
           <div>
             <p className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted">
@@ -242,13 +268,20 @@ export function TransactionModal({ state, onClose }: Props) {
               setDescription(e.target.value);
               resuggest(e.target.value, type);
             }}
+            enterKeyHint="next"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                e.preventDefault();
+                amountRef.current?.focus();
+              }
+            }}
             data-autofocus
           />
         </Field>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Amount" required error={errors.amount}>
-            <MoneyInput value={amount} onChange={setAmount} currency={currency} />
+            <MoneyInput ref={amountRef} value={amount} onChange={setAmount} currency={currency} />
           </Field>
           <Field label="Date" required error={errors.date}>
             <TextInput type="date" value={date} onChange={(e) => setDate(e.target.value)} />
@@ -297,15 +330,6 @@ export function TransactionModal({ state, onClose }: Props) {
                 }}
               />
             </Field>
-            {type === 'expense' && (
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-surface2 px-3 py-2.5 text-sm">
-                <input type="checkbox" checked={refund} onChange={(e) => setRefund(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[var(--c-sage-deep)]" />
-                <span>
-                  <span className="font-medium text-ink">This is a refund</span>
-                  <span className="block text-xs text-muted">Money coming back. It reduces spending in the category instead of counting as income.</span>
-                </span>
-              </label>
-            )}
           </>
         )}
 
@@ -332,40 +356,42 @@ export function TransactionModal({ state, onClose }: Props) {
           )}
         </div>
 
-        <Field label="Tags">
-          <TagInput value={tags} onChange={setTags} suggestions={tagSuggestions} />
-        </Field>
-        <Field label="Notes">
-          <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} maxLength={500} placeholder="Anything you want to remember" />
-        </Field>
-
-        {!existing && (
-          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-muted">
-            <input type="checkbox" checked={saveAsQuick} onChange={(e) => setSaveAsQuick(e.target.checked)} className="h-4 w-4 accent-[var(--c-sage-deep)]" />
-            Save this as a quick action for next time
-          </label>
-        )}
-
-        {/* On phones: full-width buttons, the main one on top and Delete at the very bottom. */}
-        <div className="flex flex-col-reverse gap-3 border-t border-line pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2">
-          <div className={existing ? '' : 'hidden sm:block'}>
-            {existing && (
-              <Button variant="danger" onClick={remove} icon={<Trash2 size={15} />} className="w-full sm:w-auto">
-                Delete
-              </Button>
-            )}
-          </div>
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-            <Button variant="ghost" onClick={onClose} className="w-full sm:w-auto">Cancel</Button>
-            {!existing && (
-              <Button variant="soft" onClick={() => submit(true)()} disabled={busy} className="w-full sm:w-auto">
-                Save & add another
-              </Button>
-            )}
-            <Button type="submit" variant="primary" loading={busy} className="w-full sm:w-auto">
-              {existing ? 'Save changes' : 'Add transaction'}
-            </Button>
-          </div>
+        <div>
+          <button
+            type="button"
+            aria-expanded={moreOpen}
+            aria-controls="tx-more"
+            onClick={() => setMoreOpen((o) => !o)}
+            className="tap inline-flex items-center gap-1.5 text-sm font-medium text-sage-deep hover:underline"
+          >
+            <ChevronDown size={15} className={`transition-transform ${moreOpen ? 'rotate-180' : ''}`} aria-hidden />
+            {moreOpen ? 'Fewer options' : `More options${!isTransfer && type === 'expense' ? ': refund, tags, notes' : ': tags, notes'}`}
+          </button>
+          {moreOpen && (
+            <div id="tx-more" className="mt-4 flex flex-col gap-5 [animation:fade-in_0.15s_ease_both]">
+              {!isTransfer && type === 'expense' && (
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-surface2 px-3 py-2.5 text-sm">
+                  <input type="checkbox" checked={refund} onChange={(e) => setRefund(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[var(--c-sage-deep)]" />
+                  <span>
+                    <span className="font-medium text-ink">This is a refund</span>
+                    <span className="block text-xs text-muted">Money coming back. It reduces spending in the category instead of counting as income.</span>
+                  </span>
+                </label>
+              )}
+              <Field label="Tags">
+                <TagInput value={tags} onChange={setTags} suggestions={tagSuggestions} />
+              </Field>
+              <Field label="Notes">
+                <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} maxLength={500} placeholder="Anything you want to remember" />
+              </Field>
+              {!existing && (
+                <label className="flex cursor-pointer items-center gap-2.5 text-sm text-muted">
+                  <input type="checkbox" checked={saveAsQuick} onChange={(e) => setSaveAsQuick(e.target.checked)} className="h-4 w-4 accent-[var(--c-sage-deep)]" />
+                  Save this as a quick action for next time
+                </label>
+              )}
+            </div>
+          )}
         </div>
       </form>
     </Modal>
